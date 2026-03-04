@@ -23,7 +23,11 @@ fn connect_ssh() -> Result<Session, Box<dyn std::error::Error>> {
 #[test]
 fn test_ssh_connection_password_auth() {
     let result = connect_ssh();
-    assert!(result.is_ok(), "Should connect via SSH with password: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Should connect via SSH with password: {:?}",
+        result.err()
+    );
     let sess = result.unwrap();
     assert!(sess.authenticated(), "Should be authenticated");
 }
@@ -56,12 +60,18 @@ fn test_ssh_execute_command() {
 
     let mut output = String::new();
     use std::io::Read;
-    channel.read_to_string(&mut output).expect("Should read output");
+    channel
+        .read_to_string(&mut output)
+        .expect("Should read output");
     channel.wait_close().expect("Should wait for close");
 
     let exit_status = channel.exit_status().expect("Should get exit status");
     assert_eq!(exit_status, 0, "Command should exit with 0");
-    assert!(output.trim() == "hello", "Output should be 'hello', got: {}", output.trim());
+    assert!(
+        output.trim() == "hello",
+        "Output should be 'hello', got: {}",
+        output.trim()
+    );
 }
 
 #[test]
@@ -95,11 +105,12 @@ fn test_ssh_port_forwarding_channel() {
 
 #[test]
 fn test_ssh_connection_unreachable_host() {
-    let result = TcpStream::connect_timeout(
-        &"127.0.0.1:9999".parse().unwrap(),
-        Duration::from_secs(3),
+    let result =
+        TcpStream::connect_timeout(&"127.0.0.1:9999".parse().unwrap(), Duration::from_secs(3));
+    assert!(
+        result.is_err(),
+        "Should fail connecting to non-existent host:port"
     );
-    assert!(result.is_err(), "Should fail connecting to non-existent host:port");
 }
 
 #[test]

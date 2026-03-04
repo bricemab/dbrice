@@ -6,6 +6,15 @@ import { useSessionStore } from "@/stores/useSessionStore";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { toast } from "@/components/common/Toast";
 import { formatRelativeTime, cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSpinner,
+  faPlay,
+  faPen,
+  faCopy,
+  faTrash,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ConnectionCardProps {
   connection: Connection;
@@ -90,14 +99,13 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
         {/* Details */}
         <div className="space-y-0.5">
           <p className="text-xs text-muted-foreground truncate" title={connection.mysql.hostname}>
-            <i className="bx bx-server mr-1" />
             {connection.mysql.hostname}
             {connection.mysql.port !== 3306 && (
               <span className="text-muted-foreground/60">:{connection.mysql.port}</span>
             )}
           </p>
           <p className="text-xs text-muted-foreground/60">
-            <i className="bx bx-time-five mr-1" />
+            <FontAwesomeIcon icon={faClock} className="mr-1" />
             {formatRelativeTime(connection.last_connected_at)}
           </p>
         </div>
@@ -114,9 +122,9 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               title="Connect"
             >
               {isConnecting ? (
-                <i className="bx bx-loader-alt animate-spin text-sm" />
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-sm" />
               ) : (
-                <i className="bx bx-play text-sm" />
+                <FontAwesomeIcon icon={faPlay} className="text-sm" />
               )}
             </button>
           </div>
@@ -129,7 +137,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               }}
               title="Edit"
             >
-              <i className="bx bx-pencil text-sm" />
+              <FontAwesomeIcon icon={faPen} className="text-sm" />
             </button>
             <button
               className="flex h-7 w-7 items-center justify-center rounded-md bg-background/90 backdrop-blur-sm border text-muted-foreground hover:text-foreground transition-colors"
@@ -139,7 +147,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               }}
               title="Duplicate"
             >
-              <i className="bx bx-copy text-sm" />
+              <FontAwesomeIcon icon={faCopy} className="text-sm" />
             </button>
             <button
               className="flex h-7 w-7 items-center justify-center rounded-md bg-background/90 backdrop-blur-sm border text-muted-foreground hover:text-destructive transition-colors"
@@ -149,7 +157,7 @@ export function ConnectionCard({ connection, onEdit }: ConnectionCardProps) {
               }}
               title="Delete"
             >
-              <i className="bx bx-trash text-sm" />
+              <FontAwesomeIcon icon={faTrash} className="text-sm" />
             </button>
           </div>
         </div>

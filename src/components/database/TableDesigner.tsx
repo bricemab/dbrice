@@ -15,8 +15,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { tauriCreateTable, tauriAlterTable } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
-import type { TableDef, ColumnDef, IndexDef, FKDef } from "@/types/schema";
+import type { TableDef, ColumnDef, FKDef } from "@/types/schema";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTable,
+  faRotateLeft,
+  faFileCode,
+  faSpinner,
+  faCheck,
+  faPlus,
+  faTrash,
+  faBolt,
+  faPlay,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface TableDesignerProps {
   connectionId: string;
@@ -295,7 +307,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b bg-card">
-        <i className="bx bx-table text-lg text-muted-foreground" />
+        <FontAwesomeIcon icon={faTable} className="text-lg text-muted-foreground" />
         <div className="flex-1 flex items-center gap-2">
           <Label className="text-sm font-medium whitespace-nowrap">Table Name:</Label>
           <Input
@@ -309,18 +321,18 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleRevert}>
-            <i className="bx bx-undo" />
+            <FontAwesomeIcon icon={faRotateLeft} />
             Revert
           </Button>
           <Button variant="outline" size="sm" onClick={handlePreview}>
-            <i className="bx bx-code-alt" />
+            <FontAwesomeIcon icon={faFileCode} />
             Preview SQL
           </Button>
           <Button size="sm" onClick={handleApply} disabled={isApplying || !tableName.trim()}>
             {isApplying ? (
-              <><i className="bx bx-loader-alt animate-spin" />Applying...</>
+              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Applying...</>
             ) : (
-              <><i className="bx bx-check" />Apply</>
+              <><FontAwesomeIcon icon={faCheck} />Apply</>
             )}
           </Button>
         </div>
@@ -415,7 +427,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
           </ScrollArea>
           <div className="flex gap-2 mt-3 pt-3 border-t">
             <Button variant="outline" size="sm" onClick={addColumn}>
-              <i className="bx bx-plus" />
+              <FontAwesomeIcon icon={faPlus} />
               Add Column
             </Button>
             <Button
@@ -425,7 +437,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
               disabled={!selectedColId}
               className="text-destructive border-destructive/50 hover:bg-destructive/10"
             >
-              <i className="bx bx-trash" />
+              <FontAwesomeIcon icon={faTrash} />
               Delete Column
             </Button>
           </div>
@@ -497,7 +509,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         className="text-destructive"
                         onClick={() => setIndexes((prev) => prev.filter((i) => i.id !== idx.id))}
                       >
-                        <i className="bx bx-trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                       </Button>
                     </td>
                   </tr>
@@ -516,7 +528,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                 ])
               }
             >
-              <i className="bx bx-plus" />
+              <FontAwesomeIcon icon={faPlus} />
               Add Index
             </Button>
           </div>
@@ -581,7 +593,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                           setForeignKeys((prev) => prev.filter((k) => k.id !== fk.id))
                         }
                       >
-                        <i className="bx bx-trash" />
+                        <FontAwesomeIcon icon={faTrash} />
                       </Button>
                     </td>
                   </tr>
@@ -608,7 +620,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                 ])
               }
             >
-              <i className="bx bx-plus" />
+              <FontAwesomeIcon icon={faPlus} />
               Add Foreign Key
             </Button>
           </div>
@@ -618,7 +630,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
         <TabsContent value="triggers" className="flex-1 m-0 p-4">
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <div className="text-center space-y-2">
-              <i className="bx bx-zap text-3xl block" />
+              <FontAwesomeIcon icon={faBolt} className="text-3xl block" />
               <p className="text-sm">Trigger management available via context menu on table in sidebar.</p>
               <p className="text-xs">Right-click a table → Manage Triggers</p>
             </div>
@@ -702,9 +714,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
             </Button>
             <Button onClick={handleApply} disabled={isApplying}>
               {isApplying ? (
-                <><i className="bx bx-loader-alt animate-spin" />Executing...</>
+                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
               ) : (
-                <><i className="bx bx-play" />Execute</>
+                <><FontAwesomeIcon icon={faPlay} />Execute</>
               )}
             </Button>
           </DialogFooter>

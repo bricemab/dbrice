@@ -34,8 +34,8 @@ pub async fn setup_master_password(password: String) -> Result<(), String> {
 
 #[command]
 pub async fn verify_master_password(password: String) -> Result<bool, String> {
-    let hash = keychain::get_secret(&keychain::master_password_hash_key())
-        .map_err(|e| e.to_string())?;
+    let hash =
+        keychain::get_secret(&keychain::master_password_hash_key()).map_err(|e| e.to_string())?;
 
     match hash {
         Some(h) => {
@@ -97,7 +97,8 @@ fn re_encrypt_connections(old_password: &str, new_password: &str) -> Result<()> 
                 row.get::<_, Option<String>>(4)?.unwrap_or_default(),
             ))
         })?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(|e| anyhow::anyhow!(e))
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| anyhow::anyhow!(e))
     })?;
 
     // Re-encrypt each connection
@@ -143,7 +144,8 @@ pub async fn reset_dbrice() -> Result<(), String> {
     let connection_ids: Vec<String> = crate::db::local::with_db(|conn| {
         let mut stmt = conn.prepare("SELECT id FROM connections")?;
         let ids = stmt.query_map([], |row| row.get::<_, String>(0))?;
-        ids.collect::<Result<Vec<_>, _>>().map_err(|e| anyhow::anyhow!(e))
+        ids.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| anyhow::anyhow!(e))
     })
     .map_err(|e| e.to_string())?;
 

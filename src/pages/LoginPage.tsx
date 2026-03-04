@@ -4,6 +4,15 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/common/Toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faDatabase,
+  faEye,
+  faEyeSlash,
+  faCircleExclamation,
+  faSpinner,
+  faLockOpen,
+} from "@fortawesome/free-solid-svg-icons";
 
 export function LoginPage() {
   const { login, reset, error } = useAuthStore();
@@ -48,7 +57,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center gap-2">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg">
-            <i className="bx bx-data text-3xl text-white" />
+            <FontAwesomeIcon icon={faDatabase} className="text-3xl text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground">DBrice</h1>
           <p className="text-sm text-muted-foreground">MySQL Client</p>
@@ -77,14 +86,14 @@ export function LoginPage() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setShowPassword((v) => !v)}
               >
-                <i className={`bx ${showPassword ? "bx-hide" : "bx-show"}`} />
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
               </button>
             </div>
 
             {/* Error message */}
             {error && (
               <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive animate-fade-in">
-                <i className="bx bx-error-circle shrink-0" />
+                <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -92,12 +101,12 @@ export function LoginPage() {
             <Button type="submit" className="w-full" disabled={!password || isLoading}>
               {isLoading ? (
                 <>
-                  <i className="bx bx-loader-alt animate-spin" />
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
                   Unlocking...
                 </>
               ) : (
                 <>
-                  <i className="bx bx-lock-open" />
+                  <FontAwesomeIcon icon={faLockOpen} />
                   Unlock
                 </>
               )}

@@ -14,7 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSpinner,
+  faPlay,
+  faCode,
+  faCircleExclamation,
+  faXmark,
+  faCircleInfo,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface SqlSheetProps {
   connectionId: string;
@@ -104,12 +112,12 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
         >
           {isExecuting ? (
             <>
-              <i className="bx bx-loader-alt animate-spin" />
+              <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
               Running...
             </>
           ) : (
             <>
-              <i className="bx bx-play" />
+              <FontAwesomeIcon icon={faPlay} />
               Execute
             </>
           )}
@@ -136,7 +144,7 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
           className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title="Format SQL"
         >
-          <i className="bx bx-code" />
+          <FontAwesomeIcon icon={faCode} />
           Format
         </button>
       </div>
@@ -171,13 +179,13 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
           {/* Error banner */}
           {error && (
             <div className="flex items-start gap-2 px-3 py-2 bg-red-500/10 border-b border-red-500/20 text-sm text-red-600 dark:text-red-400">
-              <i className="bx bx-error-circle shrink-0 mt-0.5" />
+              <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0 mt-0.5" />
               <span className="flex-1 text-xs break-all font-mono">{error}</span>
               <button
                 className="text-muted-foreground hover:text-foreground shrink-0"
                 onClick={() => setError(null)}
               >
-                <i className="bx bx-x" />
+                <FontAwesomeIcon icon={faXmark} />
               </button>
             </div>
           )}
@@ -186,7 +194,7 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
             <ResultGrid result={result} connectionId={connectionId} />
           ) : !error ? (
             <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-              <i className="bx bx-info-circle mr-2 text-lg" />
+              <FontAwesomeIcon icon={faCircleInfo} className="mr-2 text-lg" />
               Press Ctrl+Enter to execute the query
             </div>
           ) : null}

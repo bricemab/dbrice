@@ -5,6 +5,8 @@ import { HomePage } from "@/pages/HomePage";
 import { WorkspacePage } from "@/pages/WorkspacePage";
 import { SettingsPage } from "@/components/settings/SettingsPage";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGear } from "@fortawesome/free-solid-svg-icons";
 
 export function AppShell() {
   const { activeConnectionId, connectionTabs } = useTabStore();
@@ -23,7 +25,7 @@ export function AppShell() {
           onClick={() => setShowSettings(true)}
           title="Settings"
         >
-          <i className="bx bx-cog text-sm" />
+          <FontAwesomeIcon icon={faGear} className="text-sm" />
         </button>
       </div>
       <div className="flex-1 overflow-hidden">

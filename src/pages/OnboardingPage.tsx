@@ -3,6 +3,15 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faDatabase,
+  faEye,
+  faEyeSlash,
+  faCircleExclamation,
+  faSpinner,
+  faLock,
+} from "@fortawesome/free-solid-svg-icons";
 
 export function OnboardingPage() {
   const { setupPassword } = useAuthStore();
@@ -42,7 +51,7 @@ export function OnboardingPage() {
       <div className="relative z-10 w-full max-w-sm px-4">
         <div className="mb-8 flex flex-col items-center gap-2">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg">
-            <i className="bx bx-data text-3xl text-white" />
+            <FontAwesomeIcon icon={faDatabase} className="text-3xl text-white" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">DBrice</h1>
           <p className="text-sm text-muted-foreground">MySQL Client</p>
@@ -78,7 +87,7 @@ export function OnboardingPage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   onClick={() => setShowPassword((v) => !v)}
                 >
-                  <i className={`bx ${showPassword ? "bx-hide" : "bx-show"}`} />
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
                 </button>
               </div>
             </div>
@@ -119,7 +128,7 @@ export function OnboardingPage() {
 
             {error && (
               <div className="flex items-center gap-2 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                <i className="bx bx-error-circle shrink-0" />
+                <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -131,12 +140,12 @@ export function OnboardingPage() {
             >
               {isLoading ? (
                 <>
-                  <i className="bx bx-loader-alt animate-spin" />
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
                   Setting up...
                 </>
               ) : (
                 <>
-                  <i className="bx bx-lock" />
+                  <FontAwesomeIcon icon={faLock} />
                   Set Master Password
                 </>
               )}

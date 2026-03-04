@@ -16,6 +16,8 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { toast } from "@/components/common/Toast";
 import type { Theme, DefaultLimit } from "@/types/settings";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark, faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 
 export function SettingsPage({ onClose }: { onClose: () => void }) {
   const { theme, defaultLimit, setTheme, setDefaultLimit } = useSettingsStore();
@@ -77,7 +79,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
           className="text-muted-foreground hover:text-foreground transition-colors"
           onClick={onClose}
         >
-          <i className="bx bx-x text-xl" />
+          <FontAwesomeIcon icon={faXmark} className="text-xl" />
         </button>
       </div>
 
@@ -173,7 +175,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
                 size="sm"
                 onClick={() => setShowResetModal(true)}
               >
-                <i className="bx bx-reset" />
+                <FontAwesomeIcon icon={faRotateLeft} />
                 Reset DBrice
               </Button>
             </div>

@@ -12,6 +12,16 @@ import { toast } from "@/components/common/Toast";
 import { useTabStore } from "@/stores/useTabStore";
 import type { RoutineDef, RoutineParam } from "@/types/schema";
 import type { QueryResult } from "@/types/mysql";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSpinner,
+  faCode,
+  faPlay,
+  faTrash,
+  faFloppyDisk,
+  faCircleExclamation,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface RoutineEditorProps {
   connectionId: string;
@@ -173,7 +183,7 @@ export function RoutineEditor({
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
-        <i className="bx bx-loader-alt animate-spin text-2xl text-muted-foreground" />
+        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-muted-foreground" />
       </div>
     );
   }
@@ -182,7 +192,7 @@ export function RoutineEditor({
     <div className="flex flex-col h-full">
       {/* Toolbar */}
       <div className="flex items-center gap-2 px-4 py-2 border-b bg-card">
-        <i className={`bx ${routineType === "PROCEDURE" ? "bx-code-curly" : "bx-math"} text-muted-foreground`} />
+        <FontAwesomeIcon icon={faCode} className="text-muted-foreground" />
         <span className="text-sm font-medium">
           {isNew ? `New ${routineType}` : `${routineName} — ${routineType}`}
         </span>
@@ -195,7 +205,7 @@ export function RoutineEditor({
               onClick={() => setShowDropConfirm(true)}
               className="text-destructive border-destructive/50 hover:bg-destructive/10"
             >
-              <i className="bx bx-trash" />
+              <FontAwesomeIcon icon={faTrash} />
               Drop
             </Button>
           )}
@@ -206,16 +216,16 @@ export function RoutineEditor({
             disabled={isExecuting}
           >
             {isExecuting ? (
-              <><i className="bx bx-loader-alt animate-spin" />Executing...</>
+              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
             ) : (
-              <><i className="bx bx-play" />Execute</>
+              <><FontAwesomeIcon icon={faPlay} />Execute</>
             )}
           </Button>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
-              <><i className="bx bx-loader-alt animate-spin" />Saving...</>
+              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Saving...</>
             ) : (
-              <><i className="bx bx-save" />Save</>
+              <><FontAwesomeIcon icon={faFloppyDisk} />Save</>
             )}
           </Button>
         </div>
@@ -234,10 +244,10 @@ export function RoutineEditor({
         {/* Error */}
         {error && (
           <div className="mx-4 mb-2 flex items-start gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-            <i className="bx bx-error-circle shrink-0 mt-0.5" />
+            <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0 mt-0.5" />
             <span className="flex-1">{error}</span>
             <button onClick={() => setError(null)}>
-              <i className="bx bx-x" />
+              <FontAwesomeIcon icon={faXmark} />
             </button>
           </div>
         )}
@@ -295,9 +305,9 @@ export function RoutineEditor({
               disabled={isExecuting}
             >
               {isExecuting ? (
-                <><i className="bx bx-loader-alt animate-spin" />Executing...</>
+                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
               ) : (
-                <><i className="bx bx-play" />Execute</>
+                <><FontAwesomeIcon icon={faPlay} />Execute</>
               )}
             </Button>
           </DialogFooter>

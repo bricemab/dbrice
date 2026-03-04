@@ -1,8 +1,19 @@
 import { useState, useMemo, useCallback } from "react";
-import type { QueryResult, ColumnMeta } from "@/types/mysql";
+import type { QueryResult } from "@/types/mysql";
 import { tauriExecuteQuery } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCircleCheck,
+  faFileExport,
+  faFileCode,
+  faRotate,
+  faSortUp,
+  faSortDown,
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ResultGridProps {
   result: QueryResult;
@@ -161,9 +172,9 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
   if (result.columns.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        <i className="bx bx-check-circle mr-2 text-green-500" />
+        <FontAwesomeIcon icon={faCircleCheck} className="mr-2 text-green-500" />
         {result.rows_affected > 0
-          ? `${result.rows_affected} row(s) affected in ${result.execution_time_ms}ms`
+          ? `${result.rows_affected} rows affected in ${result.execution_time_ms}ms`
           : `Query OK in ${result.execution_time_ms}ms`}
       </div>
     );
@@ -182,21 +193,21 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
             className="flex items-center gap-1 hover:text-foreground transition-colors"
             onClick={() => {/* export CSV */}}
           >
-            <i className="bx bx-export" />
+            <FontAwesomeIcon icon={faFileExport} />
             CSV
           </button>
           <button
             className="flex items-center gap-1 hover:text-foreground transition-colors"
             onClick={() => {/* export JSON */}}
           >
-            <i className="bx bx-code-alt" />
+            <FontAwesomeIcon icon={faFileCode} />
             JSON
           </button>
           <button
             className="flex items-center gap-1 hover:text-foreground transition-colors"
             title="Refresh"
           >
-            <i className="bx bx-refresh" />
+            <FontAwesomeIcon icon={faRotate} />
           </button>
         </div>
       </div>
@@ -216,10 +227,9 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
                   <div className="flex items-center gap-1">
                     {col.name}
                     {sortCol === col.name && (
-                      <i
-                        className={`bx text-primary text-sm ${
-                          sortDir === "asc" ? "bx-sort-up" : "bx-sort-down"
-                        }`}
+                      <FontAwesomeIcon
+                        icon={sortDir === "asc" ? faSortUp : faSortDown}
+                        className="text-primary text-sm"
                       />
                     )}
                   </div>
@@ -307,18 +317,18 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
           >
-            <i className="bx bx-chevron-left" />
+            <FontAwesomeIcon icon={faChevronLeft} />
           </button>
           <span>
-            Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, processedRows.length)}{" "}
-            of {processedRows.length}+
+            Page {page + 1} of {totalPages} — Showing {page * PAGE_SIZE + 1}–
+            {Math.min((page + 1) * PAGE_SIZE, processedRows.length)} of {processedRows.length}
           </span>
           <button
             className="hover:text-foreground disabled:opacity-40"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
           >
-            <i className="bx bx-chevron-right" />
+            <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
       )}

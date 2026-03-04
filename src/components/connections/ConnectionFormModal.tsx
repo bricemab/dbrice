@@ -23,6 +23,13 @@ import { useConnectionStore } from "@/stores/useConnectionStore";
 import { tauriTestConnection } from "@/lib/tauri";
 import type { Connection, CreateConnectionInput } from "@/types/connection";
 import { generateConnectionColor } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSpinner,
+  faEye,
+  faEyeSlash,
+  faFloppyDisk,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ConnectionFormModalProps {
   open: boolean;
@@ -248,7 +255,7 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowSshPassword((v) => !v)}
                     >
-                      <i className={`bx ${showSshPassword ? "bx-hide" : "bx-show"}`} />
+                      <FontAwesomeIcon icon={showSshPassword ? faEyeSlash : faEye} />
                     </button>
                   </div>
                 </div>
@@ -275,7 +282,7 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       onClick={() => setShowSshPassphrase((v) => !v)}
                     >
-                      <i className={`bx ${showSshPassphrase ? "bx-hide" : "bx-show"}`} />
+                      <FontAwesomeIcon icon={showSshPassphrase ? faEyeSlash : faEye} />
                     </button>
                   </div>
                 </div>
@@ -324,7 +331,7 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     onClick={() => setShowMysqlPassword((v) => !v)}
                   >
-                    <i className={`bx ${showMysqlPassword ? "bx-hide" : "bx-show"}`} />
+                    <FontAwesomeIcon icon={showMysqlPassword ? faEyeSlash : faEye} />
                   </button>
                 </div>
               </div>
@@ -347,12 +354,11 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
           <Button variant="outline" onClick={handleTest} disabled={testStatus === "testing"}>
             {testStatus === "testing" ? (
               <>
-                <i className="bx bx-loader-alt animate-spin" />
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
                 Testing...
               </>
             ) : (
               <>
-                <i className="bx bx-wifi" />
                 Test Connection
               </>
             )}
@@ -364,12 +370,12 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
             <Button onClick={handleSave} disabled={!form.name.trim() || isSaving}>
               {isSaving ? (
                 <>
-                  <i className="bx bx-loader-alt animate-spin" />
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <i className="bx bx-save" />
+                  <FontAwesomeIcon icon={faFloppyDisk} />
                   Save
                 </>
               )}

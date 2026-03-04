@@ -5,6 +5,14 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { toast } from "@/components/common/Toast";
 import { ConnectionCard } from "./ConnectionCard";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFolder,
+  faFolderOpen,
+  faChevronRight,
+  faPen,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface FolderCardProps {
   folder: Folder;
@@ -58,11 +66,9 @@ export function FolderCard({ folder, connections, onEditConnection }: FolderCard
           )}
           onClick={() => toggleFolderExpanded(folder.id)}
         >
-          <i
-            className={cn(
-              "bx text-lg text-muted-foreground transition-transform",
-              isExpanded ? "bx-folder-open" : "bx-folder",
-            )}
+          <FontAwesomeIcon
+            icon={isExpanded ? faFolderOpen : faFolder}
+            className="text-lg text-muted-foreground transition-transform"
           />
 
           {isEditing ? (
@@ -86,9 +92,10 @@ export function FolderCard({ folder, connections, onEditConnection }: FolderCard
             {connections.length} connection{connections.length !== 1 ? "s" : ""}
           </span>
 
-          <i
+          <FontAwesomeIcon
+            icon={faChevronRight}
             className={cn(
-              "bx bx-chevron-right text-muted-foreground transition-transform",
+              "text-muted-foreground transition-transform",
               isExpanded && "rotate-90",
             )}
           />
@@ -106,14 +113,14 @@ export function FolderCard({ folder, connections, onEditConnection }: FolderCard
               }}
               title="Rename folder"
             >
-              <i className="bx bx-pencil text-sm" />
+              <FontAwesomeIcon icon={faPen} className="text-sm" />
             </button>
             <button
               className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               onClick={() => setShowDeleteModal(true)}
               title="Delete folder"
             >
-              <i className="bx bx-trash text-sm" />
+              <FontAwesomeIcon icon={faTrash} className="text-sm" />
             </button>
           </div>
         </div>

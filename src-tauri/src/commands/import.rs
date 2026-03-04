@@ -29,7 +29,9 @@ pub async fn import_sql(options: ImportOptions) -> Result<ImportResult, String> 
     }
 
     // Use target database
-    let use_db = options.create_database.as_deref()
+    let use_db = options
+        .create_database
+        .as_deref()
         .or(options.target_database.as_deref());
 
     if let Some(db) = use_db {

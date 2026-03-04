@@ -6,6 +6,14 @@ import { ConnectionFormModal } from "@/components/connections/ConnectionFormModa
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/common/Toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFolderPlus,
+  faPlus,
+  faMagnifyingGlass,
+  faXmark,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
 export function HomePage() {
   const { load, createFolder, setSearchQuery, searchQuery, isLoading } = useConnectionStore();
@@ -40,15 +48,15 @@ export function HomePage() {
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-3 border-b bg-background/95 backdrop-blur-sm">
         <Button variant="outline" size="sm" onClick={handleNewFolder}>
-          <i className="bx bx-folder-plus" />
+          <FontAwesomeIcon icon={faFolderPlus} />
           New Folder
         </Button>
         <Button size="sm" onClick={() => setShowConnectionModal(true)}>
-          <i className="bx bx-plus" />
+          <FontAwesomeIcon icon={faPlus} />
           New Connection
         </Button>
         <div className="relative ml-auto w-64">
-          <i className="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm" />
+          <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm" />
           <Input
             placeholder="Search connections..."
             value={searchQuery}
@@ -60,7 +68,7 @@ export function HomePage() {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               onClick={() => setSearchQuery("")}
             >
-              <i className="bx bx-x text-sm" />
+              <FontAwesomeIcon icon={faXmark} className="text-sm" />
             </button>
           )}
         </div>
@@ -70,7 +78,7 @@ export function HomePage() {
       <div className="flex-1 overflow-auto p-4">
         {isLoading ? (
           <div className="flex items-center justify-center h-48 text-muted-foreground">
-            <i className="bx bx-loader-alt animate-spin text-2xl mr-3" />
+            <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl mr-3" />
             Loading connections...
           </div>
         ) : (

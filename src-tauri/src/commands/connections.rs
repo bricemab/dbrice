@@ -5,7 +5,9 @@ use uuid::Uuid;
 
 use crate::crypto::{aes, keychain};
 use crate::db::local::{get_setting, with_db};
-use crate::models::connection::{Connection, ConnectionMethod, Folder, MySQLConfig, SSHAuthMethod, SSHConfig};
+use crate::models::connection::{
+    Connection, ConnectionMethod, Folder, MySQLConfig, SSHAuthMethod, SSHConfig,
+};
 
 fn get_session_key() -> Result<String, String> {
     get_setting("_session_key")
@@ -72,10 +74,24 @@ pub async fn get_connections() -> Result<Vec<Connection>, String> {
         let mut connections = Vec::new();
         for row in rows {
             let (
-                id, name, folder_id, color, method,
-                hostname_enc, port, username_enc, default_schema,
-                ssh_hostname_enc, ssh_port, ssh_username_enc, ssh_auth_method, ssh_key_file_path,
-                sort_order, last_connected_at, created_at, updated_at,
+                id,
+                name,
+                folder_id,
+                color,
+                method,
+                hostname_enc,
+                port,
+                username_enc,
+                default_schema,
+                ssh_hostname_enc,
+                ssh_port,
+                ssh_username_enc,
+                ssh_auth_method,
+                ssh_key_file_path,
+                sort_order,
+                last_connected_at,
+                created_at,
+                updated_at,
             ) = row.map_err(|e| anyhow::anyhow!(e))?;
 
             let hostname = aes::decrypt(&hostname_enc, &key)?;
@@ -148,15 +164,14 @@ pub async fn create_connection(input: CreateConnectionInput) -> Result<Connectio
             .map_err(|e| e.to_string())?;
     }
 
-    let (ssh_hostname_enc, ssh_username_enc) = if let (Some(host), Some(user)) =
-        (&input.ssh_hostname, &input.ssh_username)
-    {
-        let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
-        let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
-        (Some(h), Some(u))
-    } else {
-        (None, None)
-    };
+    let (ssh_hostname_enc, ssh_username_enc) =
+        if let (Some(host), Some(user)) = (&input.ssh_hostname, &input.ssh_username) {
+            let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
+            let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
+            (Some(h), Some(u))
+        } else {
+            (None, None)
+        };
 
     // Store SSH password in keychain
     if let Some(ref ssh_pass) = input.ssh_password {
@@ -165,11 +180,8 @@ pub async fn create_connection(input: CreateConnectionInput) -> Result<Connectio
     }
 
     let sort_order = with_db(|conn| {
-        let count: i32 = conn.query_row(
-            "SELECT COUNT(*) FROM connections",
-            [],
-            |row| row.get(0),
-        )?;
+        let count: i32 =
+            conn.query_row("SELECT COUNT(*) FROM connections", [], |row| row.get(0))?;
         Ok(count)
     })
     .map_err(|e| e.to_string())?;
@@ -212,15 +224,14 @@ pub async fn update_connection(
             .map_err(|e| e.to_string())?;
     }
 
-    let (ssh_hostname_enc, ssh_username_enc) = if let (Some(host), Some(user)) =
-        (&input.ssh_hostname, &input.ssh_username)
-    {
-        let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
-        let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
-        (Some(h), Some(u))
-    } else {
-        (None, None)
-    };
+    let (ssh_hostname_enc, ssh_username_enc) =
+        if let (Some(host), Some(user)) = (&input.ssh_hostname, &input.ssh_username) {
+            let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
+            let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
+            (Some(h), Some(u))
+        } else {
+            (None, None)
+        };
 
     if let Some(ref ssh_pass) = input.ssh_password {
         keychain::store_secret(&keychain::ssh_password_key(&id), ssh_pass)
@@ -272,10 +283,8 @@ pub async fn duplicate_connection(id: String) -> Result<Connection, String> {
     let new_id = Uuid::new_v4().to_string();
     let key = get_session_key()?;
 
-    let hostname_enc =
-        aes::encrypt(&original.mysql.hostname, &key).map_err(|e| e.to_string())?;
-    let username_enc =
-        aes::encrypt(&original.mysql.username, &key).map_err(|e| e.to_string())?;
+    let hostname_enc = aes::encrypt(&original.mysql.hostname, &key).map_err(|e| e.to_string())?;
+    let username_enc = aes::encrypt(&original.mysql.username, &key).map_err(|e| e.to_string())?;
 
     // Copy MySQL password
     if let Ok(Some(password)) = keychain::get_secret(&keychain::mysql_password_key(&id)) {
@@ -294,7 +303,13 @@ pub async fn duplicate_connection(id: String) -> Result<Connection, String> {
             if let Ok(Some(ssh_pass)) = keychain::get_secret(&keychain::ssh_password_key(&id)) {
                 let _ = keychain::store_secret(&keychain::ssh_password_key(&new_id), &ssh_pass);
             }
-            (Some(h), Some(u), Some(ssh.port), Some(method.to_string()), ssh.key_file_path.clone())
+            (
+                Some(h),
+                Some(u),
+                Some(ssh.port),
+                Some(method.to_string()),
+                ssh.key_file_path.clone(),
+            )
         } else {
             (None, None, None, None, None)
         };
@@ -305,7 +320,8 @@ pub async fn duplicate_connection(id: String) -> Result<Connection, String> {
     };
 
     let sort_order = with_db(|conn| {
-        let count: i32 = conn.query_row("SELECT COUNT(*) FROM connections", [], |row| row.get(0))?;
+        let count: i32 =
+            conn.query_row("SELECT COUNT(*) FROM connections", [], |row| row.get(0))?;
         Ok(count)
     })
     .map_err(|e| e.to_string())?;
@@ -355,8 +371,7 @@ pub async fn get_folders() -> Result<Vec<Folder>, String> {
 pub async fn create_folder(name: String) -> Result<Folder, String> {
     let id = Uuid::new_v4().to_string();
     let sort_order = with_db(|conn| {
-        let count: i32 =
-            conn.query_row("SELECT COUNT(*) FROM folders", [], |row| row.get(0))?;
+        let count: i32 = conn.query_row("SELECT COUNT(*) FROM folders", [], |row| row.get(0))?;
         Ok(count)
     })
     .map_err(|e| e.to_string())?;

@@ -1,9 +1,9 @@
 use anyhow::{Context, Result};
-use rusqlite::{Connection, params};
+use once_cell::sync::OnceCell;
+use rusqlite::{params, Connection};
 use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager};
-use once_cell::sync::OnceCell;
 
 static DB: OnceCell<Mutex<Connection>> = OnceCell::new();
 
@@ -26,7 +26,8 @@ pub async fn init_db(app: &AppHandle) -> Result<()> {
 
     // Run schema
     let schema = include_str!("schema.sql");
-    conn.execute_batch(schema).context("Failed to run database schema")?;
+    conn.execute_batch(schema)
+        .context("Failed to run database schema")?;
 
     DB.set(Mutex::new(conn))
         .map_err(|_| anyhow::anyhow!("Database already initialized"))?;
@@ -39,7 +40,9 @@ where
     F: FnOnce(&Connection) -> Result<T>,
 {
     let db = DB.get().context("Database not initialized")?;
-    let conn = db.lock().map_err(|e| anyhow::anyhow!("DB lock error: {}", e))?;
+    let conn = db
+        .lock()
+        .map_err(|e| anyhow::anyhow!("DB lock error: {}", e))?;
     f(&conn)
 }
 

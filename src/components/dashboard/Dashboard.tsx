@@ -4,10 +4,9 @@ import {
   tauriGetProcessList,
   tauriGetDatabaseSizes,
   tauriKillProcess,
-  tauriGetSlowQueries,
 } from "@/lib/tauri";
 import type { ServerStatus, ProcessInfo, DatabaseSize } from "@/types/mysql";
-import { formatUptime, formatDuration } from "@/lib/utils";
+import { formatUptime } from "@/lib/utils";
 import { toast } from "@/components/common/Toast";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +21,15 @@ import {
   Bar,
   Cell,
 } from "recharts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSpinner,
+  faDatabase,
+  faClock,
+  faMicrochip,
+  faArrowTrendUp,
+} from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface DashboardPageProps {
   connectionId: string;
@@ -88,7 +96,7 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
   if (!status) {
     return (
       <div className="flex h-full items-center justify-center text-muted-foreground">
-        <i className="bx bx-loader-alt animate-spin text-2xl mr-3" />
+        <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl mr-3" />
         Loading dashboard...
       </div>
     );
@@ -104,19 +112,19 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
           Server Status
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <MetricCard icon="bx-data" label="Version" value={status.version} />
+          <MetricCard icon={faDatabase} label="Version" value={status.version} />
           <MetricCard
-            icon="bx-time"
+            icon={faClock}
             label="Uptime"
             value={formatUptime(status.uptime_seconds)}
           />
           <MetricCard
-            icon="bx-chip"
+            icon={faMicrochip}
             label="Queries/sec"
             value={status.questions_per_sec.toFixed(1)}
           />
           <MetricCard
-            icon="bx-trending-up"
+            icon={faArrowTrendUp}
             label="Slow Queries"
             value={status.slow_queries_count.toString()}
           />
@@ -248,11 +256,11 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
   );
 }
 
-function MetricCard({ icon, label, value }: { icon: string; label: string; value: string }) {
+function MetricCard({ icon, label, value }: { icon: IconDefinition; label: string; value: string }) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center gap-2 mb-1">
-        <i className={`bx ${icon} text-primary text-lg`} />
+        <FontAwesomeIcon icon={icon} className="text-primary text-lg" />
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <p className="text-sm font-semibold truncate" title={value}>

@@ -31,10 +31,12 @@ async fn test_select_with_limit() {
     let pool = get_pool().await;
 
     // Create test table
-    sqlx::query("CREATE TABLE IF NOT EXISTS test_limit (id INT AUTO_INCREMENT PRIMARY KEY, val INT)")
-        .execute(&pool)
-        .await
-        .unwrap();
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS test_limit (id INT AUTO_INCREMENT PRIMARY KEY, val INT)",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
 
     // Insert 10 rows
     for i in 0..10 {
@@ -51,7 +53,10 @@ async fn test_select_with_limit() {
 
     assert_eq!(rows.len(), 5);
 
-    sqlx::query("DROP TABLE IF EXISTS test_limit").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_limit")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
@@ -59,10 +64,12 @@ async fn test_select_with_limit() {
 async fn test_insert_rows_affected() {
     let pool = get_pool().await;
 
-    sqlx::query("CREATE TABLE IF NOT EXISTS test_insert (id INT AUTO_INCREMENT PRIMARY KEY, val TEXT)")
-        .execute(&pool)
-        .await
-        .unwrap();
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS test_insert (id INT AUTO_INCREMENT PRIMARY KEY, val TEXT)",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
 
     let result = sqlx::query("INSERT INTO test_insert (val) VALUES ('hello')")
         .execute(&pool)
@@ -71,7 +78,10 @@ async fn test_insert_rows_affected() {
 
     assert_eq!(result.rows_affected(), 1);
 
-    sqlx::query("DROP TABLE IF EXISTS test_insert").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_insert")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
@@ -79,10 +89,12 @@ async fn test_insert_rows_affected() {
 async fn test_update_rows_affected() {
     let pool = get_pool().await;
 
-    sqlx::query("CREATE TABLE IF NOT EXISTS test_update (id INT AUTO_INCREMENT PRIMARY KEY, val INT)")
-        .execute(&pool)
-        .await
-        .unwrap();
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS test_update (id INT AUTO_INCREMENT PRIMARY KEY, val INT)",
+    )
+    .execute(&pool)
+    .await
+    .unwrap();
 
     sqlx::query("INSERT INTO test_update (val) VALUES (1), (2), (3)")
         .execute(&pool)
@@ -96,7 +108,10 @@ async fn test_update_rows_affected() {
 
     assert_eq!(result.rows_affected(), 3);
 
-    sqlx::query("DROP TABLE IF EXISTS test_update").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_update")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
@@ -121,7 +136,10 @@ async fn test_delete_rows_affected() {
 
     assert_eq!(result.rows_affected(), 3);
 
-    sqlx::query("DROP TABLE IF EXISTS test_delete").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_delete")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
@@ -129,13 +147,15 @@ async fn test_delete_rows_affected() {
 async fn test_syntax_error() {
     let pool = get_pool().await;
 
-    let result = sqlx::query("SELEC * FORM nonexistent")
-        .execute(&pool)
-        .await;
+    let result = sqlx::query("SELEC * FORM nonexistent").execute(&pool).await;
 
     assert!(result.is_err());
     let err = result.unwrap_err().to_string();
-    assert!(err.contains("1064") || err.contains("syntax"), "Expected syntax error: {}", err);
+    assert!(
+        err.contains("1064") || err.contains("syntax"),
+        "Expected syntax error: {}",
+        err
+    );
 
     pool.close().await;
 }
@@ -163,6 +183,9 @@ async fn test_empty_table_select() {
     // Columns should still be accessible from column metadata
     // (This depends on how sqlx handles empty resultsets)
 
-    sqlx::query("DROP TABLE IF EXISTS test_empty").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_empty")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }

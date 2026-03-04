@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ConnectionFormModal } from "@/components/connections/ConnectionFormModal";
@@ -84,15 +84,14 @@ describe("ConnectionFormModal", () => {
   });
 
   it("shows SSH tab when method is TCP/IP over SSH", async () => {
-    const user = userEvent.setup();
     render(<ConnectionFormModal open={true} onClose={vi.fn()} />);
 
-    // Find and click the method select
-    const methodSelect = screen.getByText("Standard (TCP/IP)");
-    await user.click(methodSelect);
+    // Radix Select: click the combobox trigger (not the inner span which has pointer-events:none)
+    const methodTrigger = screen.getByText("Standard (TCP/IP)").closest('[role="combobox"]') as HTMLElement;
+    fireEvent.click(methodTrigger);
 
     const sshOption = await screen.findByText("Standard TCP/IP over SSH");
-    await user.click(sshOption);
+    fireEvent.click(sshOption);
 
     await waitFor(() => {
       expect(screen.getByRole("tab", { name: /ssh/i })).toBeInTheDocument();

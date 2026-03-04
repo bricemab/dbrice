@@ -33,7 +33,8 @@ pub async fn get_logs(connection_id: String, limit: Option<u32>) -> Result<Vec<L
                 created_at: row.get(4)?,
             })
         })?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(|e| anyhow::anyhow!(e))
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| anyhow::anyhow!(e))
     })
     .map_err(|e| e.to_string())
 }

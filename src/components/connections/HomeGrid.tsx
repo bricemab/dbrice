@@ -1,8 +1,9 @@
-import { useState } from "react";
 import type { Connection } from "@/types/connection";
 import { useConnectionStore } from "@/stores/useConnectionStore";
 import { ConnectionCard } from "./ConnectionCard";
 import { FolderCard } from "./FolderCard";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface HomeGridProps {
   onEditConnection: (connection: Connection) => void;
@@ -47,7 +48,7 @@ export function HomeGrid({ onEditConnection, onNewConnection }: HomeGridProps) {
         className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border/60 bg-transparent p-4 text-muted-foreground transition-all hover:border-primary/40 hover:text-primary hover:bg-primary/5 min-h-[100px]"
         onClick={onNewConnection}
       >
-        <i className="bx bx-plus-circle text-2xl" />
+        <FontAwesomeIcon icon={faPlusCircle} className="text-2xl" />
         <span className="text-sm font-medium">New Connection</span>
       </button>
     </div>

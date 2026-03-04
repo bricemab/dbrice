@@ -1,6 +1,8 @@
 import { useRef, useState, useCallback } from "react";
 import { SidebarTree } from "./SidebarTree";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRotate } from "@fortawesome/free-solid-svg-icons";
 
 interface SidebarProps {
   connectionId: string;
@@ -52,7 +54,7 @@ export function Sidebar({ connectionId }: SidebarProps) {
           className="flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title="Refresh"
         >
-          <i className="bx bx-refresh text-sm" />
+          <FontAwesomeIcon icon={faRotate} className="text-sm" />
         </button>
       </div>
 

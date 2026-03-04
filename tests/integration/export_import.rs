@@ -24,7 +24,7 @@ async fn setup_export_table(pool: &sqlx::Pool<sqlx::MySql>) {
             value DECIMAL(10,2) DEFAULT 0.00,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
     )
     .execute(pool)
     .await
@@ -35,7 +35,7 @@ async fn setup_export_table(pool: &sqlx::Pool<sqlx::MySql>) {
             ('Product A', 10.50),
             ('Product B', 25.00),
             ('Product C', 5.75),
-            ('Product D', 100.00)"
+            ('Product D', 100.00)",
     )
     .execute(pool)
     .await
@@ -60,11 +60,20 @@ async fn test_generate_create_table_statement() {
 
     let create_sql: String = row.try_get(1).expect("Should get create statement");
 
-    assert!(create_sql.contains("CREATE TABLE"), "Should contain CREATE TABLE");
-    assert!(create_sql.contains("export_test_table"), "Should contain table name");
+    assert!(
+        create_sql.contains("CREATE TABLE"),
+        "Should contain CREATE TABLE"
+    );
+    assert!(
+        create_sql.contains("export_test_table"),
+        "Should contain table name"
+    );
     assert!(create_sql.contains("id"), "Should contain id column");
     assert!(create_sql.contains("name"), "Should contain name column");
-    assert!(create_sql.contains("AUTO_INCREMENT"), "Should contain AUTO_INCREMENT");
+    assert!(
+        create_sql.contains("AUTO_INCREMENT"),
+        "Should contain AUTO_INCREMENT"
+    );
 
     cleanup_export_table(&pool).await;
     pool.close().await;
@@ -120,7 +129,8 @@ async fn test_import_sql_statements() {
         .await
         .expect("Should create table via import SQL");
 
-    let insert_sql = "INSERT INTO import_roundtrip_table (label) VALUES ('First'), ('Second'), ('Third')";
+    let insert_sql =
+        "INSERT INTO import_roundtrip_table (label) VALUES ('First'), ('Second'), ('Third')";
     let result = sqlx::query(insert_sql)
         .execute(&pool)
         .await
@@ -150,8 +160,12 @@ async fn test_export_import_roundtrip() {
     let pool = get_pool().await;
 
     // Create source table with data
-    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_source").execute(&pool).await;
-    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_dest").execute(&pool).await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_source")
+        .execute(&pool)
+        .await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_dest")
+        .execute(&pool)
+        .await;
 
     sqlx::query(
         "CREATE TABLE roundtrip_source (
@@ -159,7 +173,7 @@ async fn test_export_import_roundtrip() {
             content TEXT,
             score FLOAT,
             PRIMARY KEY (id)
-        )"
+        )",
     )
     .execute(&pool)
     .await
@@ -169,7 +183,7 @@ async fn test_export_import_roundtrip() {
         "INSERT INTO roundtrip_source (content, score) VALUES
             ('Hello World', 9.5),
             ('Test Data', 7.2),
-            ('Round Trip', 8.8)"
+            ('Round Trip', 8.8)",
     )
     .execute(&pool)
     .await
@@ -193,8 +207,12 @@ async fn test_export_import_roundtrip() {
         let id: i32 = row.try_get("id").unwrap();
         let content: Option<String> = row.try_get("content").unwrap();
         let score: Option<f32> = row.try_get("score").unwrap();
-        let content_val = content.map(|s| format!("'{}'", s.replace('\'', "''"))).unwrap_or_else(|| "NULL".to_string());
-        let score_val = score.map(|v| format!("{}", v)).unwrap_or_else(|| "NULL".to_string());
+        let content_val = content
+            .map(|s| format!("'{}'", s.replace('\'', "''")))
+            .unwrap_or_else(|| "NULL".to_string());
+        let score_val = score
+            .map(|v| format!("{}", v))
+            .unwrap_or_else(|| "NULL".to_string());
         inserts.push(format!(
             "INSERT INTO roundtrip_dest (id, content, score) VALUES ({}, {}, {})",
             id, content_val, score_val
@@ -221,11 +239,18 @@ async fn test_export_import_roundtrip() {
         .await
         .expect("Should count dest rows");
     let dest_count: i64 = dest_rows.try_get("cnt").unwrap();
-    assert_eq!(dest_count, 3, "Destination should have same row count as source");
+    assert_eq!(
+        dest_count, 3,
+        "Destination should have same row count as source"
+    );
 
     // Cleanup
-    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_source").execute(&pool).await;
-    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_dest").execute(&pool).await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_source")
+        .execute(&pool)
+        .await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS roundtrip_dest")
+        .execute(&pool)
+        .await;
 
     pool.close().await;
 }
@@ -255,8 +280,12 @@ async fn test_import_with_disable_fk_checks() {
     let pool = get_pool().await;
 
     // Setup: child table references parent
-    let _ = sqlx::query("DROP TABLE IF EXISTS fk_child_import").execute(&pool).await;
-    let _ = sqlx::query("DROP TABLE IF EXISTS fk_parent_import").execute(&pool).await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS fk_child_import")
+        .execute(&pool)
+        .await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS fk_parent_import")
+        .execute(&pool)
+        .await;
 
     sqlx::query("CREATE TABLE fk_parent_import (id INT PRIMARY KEY)")
         .execute(&pool)
@@ -268,7 +297,7 @@ async fn test_import_with_disable_fk_checks() {
             id INT PRIMARY KEY,
             parent_id INT,
             FOREIGN KEY (parent_id) REFERENCES fk_parent_import(id)
-        )"
+        )",
     )
     .execute(&pool)
     .await
@@ -297,8 +326,12 @@ async fn test_import_with_disable_fk_checks() {
         .expect("Should re-enable FK checks");
 
     // Cleanup
-    let _ = sqlx::query("DROP TABLE IF EXISTS fk_child_import").execute(&pool).await;
-    let _ = sqlx::query("DROP TABLE IF EXISTS fk_parent_import").execute(&pool).await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS fk_child_import")
+        .execute(&pool)
+        .await;
+    let _ = sqlx::query("DROP TABLE IF EXISTS fk_parent_import")
+        .execute(&pool)
+        .await;
 
     pool.close().await;
 }

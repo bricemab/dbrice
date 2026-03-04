@@ -1,10 +1,10 @@
+use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use sqlx::{mysql::MySqlPoolOptions, Column, MySql, Pool, Row};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::Instant;
 use tauri::command;
-use once_cell::sync::Lazy;
 
 /// Public accessor for other command modules
 pub fn get_pool_extern(connection_id: &str) -> Option<Pool<MySql>> {
@@ -17,8 +17,7 @@ use crate::models::connection::ConnectionMethod;
 use crate::models::query::{ColumnMeta, QueryResult, QueryStatus, QueryType};
 use crate::ssh::tunnel;
 
-static POOLS: Lazy<Mutex<HashMap<String, Pool<MySql>>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
+static POOLS: Lazy<Mutex<HashMap<String, Pool<MySql>>>> = Lazy::new(|| Mutex::new(HashMap::new()));
 
 // In-memory SSH passphrases (cleared when app closes)
 static SSH_PASSPHRASES: Lazy<Mutex<HashMap<String, String>>> =
@@ -72,8 +71,9 @@ pub async fn connect(input: ConnectInput) -> Result<(), String> {
             p
         } else {
             let ssh = conn.ssh.as_ref().ok_or("SSH config missing")?;
-            let ssh_password = keychain::get_secret(&keychain::ssh_password_key(&input.connection_id))
-                .map_err(|e| e.to_string())?;
+            let ssh_password =
+                keychain::get_secret(&keychain::ssh_password_key(&input.connection_id))
+                    .map_err(|e| e.to_string())?;
 
             let passphrase = input.ssh_passphrase.as_deref().or_else(|| {
                 SSH_PASSPHRASES
@@ -102,7 +102,11 @@ pub async fn connect(input: ConnectInput) -> Result<(), String> {
                 ssh_password: ssh_password.clone(),
                 ssh_key_file: ssh.key_file_path.clone(),
                 ssh_key_passphrase: passphrase.map(String::from).or_else(|| {
-                    SSH_PASSPHRASES.lock().ok()?.get(&input.connection_id).cloned()
+                    SSH_PASSPHRASES
+                        .lock()
+                        .ok()?
+                        .get(&input.connection_id)
+                        .cloned()
                 }),
                 mysql_hostname: conn.mysql.hostname.clone(),
                 mysql_port: conn.mysql.port,
@@ -187,7 +191,10 @@ pub async fn disconnect(connection_id: String) -> Result<(), String> {
     }
 
     // Close pool — extract it from the lock before awaiting to avoid holding MutexGuard across await
-    let pool_to_close = POOLS.lock().ok().and_then(|mut pools| pools.remove(&connection_id));
+    let pool_to_close = POOLS
+        .lock()
+        .ok()
+        .and_then(|mut pools| pools.remove(&connection_id));
     if let Some(pool) = pool_to_close {
         pool.close().await;
     }
@@ -205,15 +212,19 @@ pub struct ExecuteQueryInput {
 
 #[command]
 pub async fn execute_query(input: ExecuteQueryInput) -> Result<QueryResult, String> {
-    let pool = get_pool(&input.connection_id)
-        .ok_or_else(|| "Not connected to database".to_string())?;
+    let pool =
+        get_pool(&input.connection_id).ok_or_else(|| "Not connected to database".to_string())?;
 
     let start = Instant::now();
     let sql = input.sql.trim().to_string();
 
     // Detect query type
     let sql_upper = sql.to_uppercase();
-    let query_type = if sql_upper.starts_with("SELECT") || sql_upper.starts_with("SHOW") || sql_upper.starts_with("DESCRIBE") || sql_upper.starts_with("EXPLAIN") {
+    let query_type = if sql_upper.starts_with("SELECT")
+        || sql_upper.starts_with("SHOW")
+        || sql_upper.starts_with("DESCRIBE")
+        || sql_upper.starts_with("EXPLAIN")
+    {
         QueryType::Select
     } else if sql_upper.starts_with("INSERT") {
         QueryType::Insert
@@ -221,7 +232,11 @@ pub async fn execute_query(input: ExecuteQueryInput) -> Result<QueryResult, Stri
         QueryType::Update
     } else if sql_upper.starts_with("DELETE") {
         QueryType::Delete
-    } else if sql_upper.starts_with("CREATE") || sql_upper.starts_with("ALTER") || sql_upper.starts_with("DROP") || sql_upper.starts_with("TRUNCATE") {
+    } else if sql_upper.starts_with("CREATE")
+        || sql_upper.starts_with("ALTER")
+        || sql_upper.starts_with("DROP")
+        || sql_upper.starts_with("TRUNCATE")
+    {
         QueryType::Ddl
     } else {
         QueryType::Other
@@ -255,11 +270,7 @@ pub async fn execute_query(input: ExecuteQueryInput) -> Result<QueryResult, Stri
                 .iter()
                 .map(|row| {
                     (0..row.len())
-                        .map(|i| {
-                            row.try_get::<Option<String>, _>(i)
-                                .ok()
-                                .flatten()
-                        })
+                        .map(|i| row.try_get::<Option<String>, _>(i).ok().flatten())
                         .collect()
                 })
                 .collect();
@@ -318,9 +329,15 @@ pub async fn test_connection(input: TestConnectionInput) -> Result<(), String> {
 
     let (host, port) = if input.method == "tcp_ip_over_ssh" {
         // Test SSH first
-        let ssh_host = input.ssh_hostname.as_deref().ok_or("SSH hostname required")?;
+        let ssh_host = input
+            .ssh_hostname
+            .as_deref()
+            .ok_or("SSH hostname required")?;
         let ssh_port = input.ssh_port.unwrap_or(22);
-        let ssh_user = input.ssh_username.as_deref().ok_or("SSH username required")?;
+        let ssh_user = input
+            .ssh_username
+            .as_deref()
+            .ok_or("SSH username required")?;
 
         tunnel::test_ssh_connection(
             ssh_host,
@@ -375,8 +392,7 @@ pub async fn test_connection(input: TestConnectionInput) -> Result<(), String> {
 
 #[command]
 pub async fn get_databases(connection_id: String) -> Result<Vec<String>, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query("SHOW DATABASES")
         .fetch_all(&pool)
@@ -391,8 +407,7 @@ pub async fn get_databases(connection_id: String) -> Result<Vec<String>, String>
 
 #[command]
 pub async fn get_tables(connection_id: String, database: String) -> Result<Vec<String>, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query(&format!("SHOW FULL TABLES FROM `{}`", database))
         .fetch_all(&pool)
@@ -429,8 +444,7 @@ pub async fn get_table_columns(
     database: String,
     table: String,
 ) -> Result<Vec<ColumnInfo>, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query(&format!(
         "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA, COLUMN_COMMENT
@@ -455,7 +469,11 @@ pub async fn get_table_columns(
                 extra: r.try_get::<String, _>(5).ok()?,
                 comment: {
                     let c: String = r.try_get(6).ok()?;
-                    if c.is_empty() { None } else { Some(c) }
+                    if c.is_empty() {
+                        None
+                    } else {
+                        Some(c)
+                    }
                 },
             })
         })
@@ -468,8 +486,7 @@ pub async fn get_table_indexes(
     database: String,
     table: String,
 ) -> Result<serde_json::Value, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query(&format!(
         "SELECT INDEX_NAME, NON_UNIQUE, SEQ_IN_INDEX, COLUMN_NAME, COLLATION, INDEX_TYPE
@@ -516,8 +533,7 @@ pub async fn get_table_foreign_keys(
     database: String,
     table: String,
 ) -> Result<serde_json::Value, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query(&format!(
         "SELECT CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME,
@@ -534,16 +550,19 @@ pub async fn get_table_foreign_keys(
     .await
     .map_err(|e| e.to_string())?;
 
-    let fks: Vec<serde_json::Value> = rows.iter().filter_map(|row| {
-        Some(serde_json::json!({
-            "name": row.try_get::<String, _>(0).ok()?,
-            "column": row.try_get::<String, _>(1).ok()?,
-            "referenced_table": row.try_get::<String, _>(2).ok()?,
-            "referenced_column": row.try_get::<String, _>(3).ok()?,
-            "on_update": row.try_get::<String, _>(4).ok()?,
-            "on_delete": row.try_get::<String, _>(5).ok()?,
-        }))
-    }).collect();
+    let fks: Vec<serde_json::Value> = rows
+        .iter()
+        .filter_map(|row| {
+            Some(serde_json::json!({
+                "name": row.try_get::<String, _>(0).ok()?,
+                "column": row.try_get::<String, _>(1).ok()?,
+                "referenced_table": row.try_get::<String, _>(2).ok()?,
+                "referenced_column": row.try_get::<String, _>(3).ok()?,
+                "on_update": row.try_get::<String, _>(4).ok()?,
+                "on_delete": row.try_get::<String, _>(5).ok()?,
+            }))
+        })
+        .collect();
 
     Ok(serde_json::Value::Array(fks))
 }
@@ -554,8 +573,7 @@ pub async fn get_table_triggers(
     database: String,
     table: String,
 ) -> Result<serde_json::Value, String> {
-    let pool = get_pool(&connection_id)
-        .ok_or_else(|| "Not connected".to_string())?;
+    let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
 
     let rows = sqlx::query(&format!(
         "SELECT TRIGGER_NAME, ACTION_TIMING, EVENT_MANIPULATION, ACTION_STATEMENT, DEFINER
@@ -567,15 +585,18 @@ pub async fn get_table_triggers(
     .await
     .map_err(|e| e.to_string())?;
 
-    let triggers: Vec<serde_json::Value> = rows.iter().filter_map(|row| {
-        Some(serde_json::json!({
-            "name": row.try_get::<String, _>(0).ok()?,
-            "timing": row.try_get::<String, _>(1).ok()?,
-            "event": row.try_get::<String, _>(2).ok()?,
-            "statement": row.try_get::<String, _>(3).ok()?,
-            "definer": row.try_get::<Option<String>, _>(4).ok().flatten(),
-        }))
-    }).collect();
+    let triggers: Vec<serde_json::Value> = rows
+        .iter()
+        .filter_map(|row| {
+            Some(serde_json::json!({
+                "name": row.try_get::<String, _>(0).ok()?,
+                "timing": row.try_get::<String, _>(1).ok()?,
+                "event": row.try_get::<String, _>(2).ok()?,
+                "statement": row.try_get::<String, _>(3).ok()?,
+                "definer": row.try_get::<Option<String>, _>(4).ok().flatten(),
+            }))
+        })
+        .collect();
 
     Ok(serde_json::Value::Array(triggers))
 }
@@ -590,11 +611,17 @@ pub async fn get_views(connection_id: String, database: String) -> Result<Vec<St
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok(rows.iter().filter_map(|r| r.try_get::<String, _>(0).ok()).collect())
+    Ok(rows
+        .iter()
+        .filter_map(|r| r.try_get::<String, _>(0).ok())
+        .collect())
 }
 
 #[command]
-pub async fn get_procedures(connection_id: String, database: String) -> Result<Vec<String>, String> {
+pub async fn get_procedures(
+    connection_id: String,
+    database: String,
+) -> Result<Vec<String>, String> {
     let pool = get_pool(&connection_id).ok_or_else(|| "Not connected".to_string())?;
     let rows = sqlx::query(&format!(
         "SELECT ROUTINE_NAME FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA = '{}' AND ROUTINE_TYPE = 'PROCEDURE'",
@@ -603,7 +630,10 @@ pub async fn get_procedures(connection_id: String, database: String) -> Result<V
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok(rows.iter().filter_map(|r| r.try_get::<String, _>(0).ok()).collect())
+    Ok(rows
+        .iter()
+        .filter_map(|r| r.try_get::<String, _>(0).ok())
+        .collect())
 }
 
 #[command]
@@ -616,7 +646,10 @@ pub async fn get_functions(connection_id: String, database: String) -> Result<Ve
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok(rows.iter().filter_map(|r| r.try_get::<String, _>(0).ok()).collect())
+    Ok(rows
+        .iter()
+        .filter_map(|r| r.try_get::<String, _>(0).ok())
+        .collect())
 }
 
 #[command]
@@ -629,7 +662,10 @@ pub async fn get_events(connection_id: String, database: String) -> Result<Vec<S
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
-    Ok(rows.iter().filter_map(|r| r.try_get::<String, _>(0).ok()).collect())
+    Ok(rows
+        .iter()
+        .filter_map(|r| r.try_get::<String, _>(0).ok())
+        .collect())
 }
 
 #[command]

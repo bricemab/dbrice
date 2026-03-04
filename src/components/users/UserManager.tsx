@@ -26,6 +26,16 @@ import {
 import { toast } from "@/components/common/Toast";
 import type { MySQLUser } from "@/types/schema";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlus,
+  faSpinner,
+  faUser,
+  faCircle,
+  faPen,
+  faTrash,
+  faFloppyDisk,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface UserManagerProps {
   connectionId: string;
@@ -89,7 +99,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
   const [userToDelete, setUserToDelete] = useState<MySQLUser | null>(null);
 
   // Privileges state
-  const [schemaPrivileges, setSchemaPrivileges] = useState<Record<string, Record<string, boolean>>>({});
+  const [, setSchemaPrivileges] = useState<Record<string, Record<string, boolean>>>({});
   const [adminPrivileges, setAdminPrivileges] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -237,14 +247,14 @@ export function UserManager({ connectionId }: UserManagerProps) {
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h3 className="font-semibold text-sm">MySQL Users</h3>
           <Button size="sm" onClick={openNewUser}>
-            <i className="bx bx-plus" />
+            <FontAwesomeIcon icon={faPlus} />
             Add User
           </Button>
         </div>
         <ScrollArea className="flex-1">
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <i className="bx bx-loader-alt animate-spin text-muted-foreground" />
+              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-muted-foreground" />
             </div>
           ) : (
             <div className="p-2 space-y-1">
@@ -259,7 +269,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
                   )}
                   onClick={() => handleSelectUser(user)}
                 >
-                  <i className="bx bx-user text-muted-foreground shrink-0" />
+                  <FontAwesomeIcon icon={faUser} className="text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{user.user}</div>
                     <div className="text-xs text-muted-foreground">@{user.host}</div>
@@ -269,7 +279,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
                       className="p-1 hover:text-foreground text-muted-foreground"
                       onClick={(e) => { e.stopPropagation(); openEditUser(user); }}
                     >
-                      <i className="bx bx-pencil text-sm" />
+                      <FontAwesomeIcon icon={faPen} className="text-sm" />
                     </button>
                     <button
                       className="p-1 hover:text-destructive text-muted-foreground"
@@ -279,7 +289,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
                         setShowDeleteConfirm(true);
                       }}
                     >
-                      <i className="bx bx-trash text-sm" />
+                      <FontAwesomeIcon icon={faTrash} className="text-sm" />
                     </button>
                   </div>
                 </div>
@@ -294,7 +304,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
         {!selectedUser ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <div className="text-center space-y-2">
-              <i className="bx bx-user-circle text-4xl block" />
+              <FontAwesomeIcon icon={faCircle} className="text-4xl block" />
               <p className="text-sm">Select a user to manage privileges</p>
             </div>
           </div>
@@ -463,9 +473,9 @@ export function UserManager({ connectionId }: UserManagerProps) {
             <Button variant="outline" onClick={() => setShowUserModal(false)}>Cancel</Button>
             <Button onClick={handleSaveUser} disabled={isSaving}>
               {isSaving ? (
-                <><i className="bx bx-loader-alt animate-spin" />Saving...</>
+                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Saving...</>
               ) : (
-                <><i className="bx bx-save" />Save</>
+                <><FontAwesomeIcon icon={faFloppyDisk} />Save</>
               )}
             </Button>
           </DialogFooter>
@@ -488,8 +498,8 @@ export function UserManager({ connectionId }: UserManagerProps) {
 
 // Schema privileges sub-panel
 function SchemaPrivilegesPanel({
-  connectionId,
-  user,
+  connectionId: _connectionId,
+  user: _user,
   onApply,
 }: {
   connectionId: string;

@@ -2,6 +2,8 @@ import { useTabStore } from "@/stores/useTabStore";
 import { useSessionStore } from "@/stores/useSessionStore";
 import { useConnectionStore } from "@/stores/useConnectionStore";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark, faHouse, faPlus } from "@fortawesome/free-solid-svg-icons";
 
 export function TabBar() {
   const { connectionTabs, activeConnectionId, setActiveConnection, closeConnectionTab } =
@@ -65,7 +67,7 @@ export function TabBar() {
                 className="ml-1 h-4 w-4 flex items-center justify-center rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors shrink-0"
                 onClick={(e) => handleClose(tab.connectionId, e)}
               >
-                <i className="bx bx-x text-xs" />
+                <FontAwesomeIcon icon={faXmark} className="text-xs" />
               </button>
             </button>
           );
@@ -81,7 +83,7 @@ export function TabBar() {
         onClick={() => setActiveConnection("")}
         title="Home"
       >
-        <i className="bx bx-home text-sm" />
+        <FontAwesomeIcon icon={faHouse} className="text-sm" />
       </button>
 
       {/* Plus button */}
@@ -90,7 +92,7 @@ export function TabBar() {
         onClick={() => setActiveConnection("")}
         title="Open new connection"
       >
-        <i className="bx bx-plus text-sm" />
+        <FontAwesomeIcon icon={faPlus} className="text-sm" />
       </button>
     </div>
   );

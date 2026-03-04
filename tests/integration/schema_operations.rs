@@ -11,7 +11,10 @@ async fn get_pool() -> sqlx::Pool<sqlx::MySql> {
 #[tokio::test]
 async fn test_create_table_with_pk_and_nn() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_schema_create").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_schema_create")
+        .execute(&pool)
+        .await
+        .unwrap();
 
     sqlx::query(
         "CREATE TABLE test_schema_create (
@@ -19,7 +22,7 @@ async fn test_create_table_with_pk_and_nn() {
             name VARCHAR(255) NOT NULL,
             email VARCHAR(255) UNIQUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )"
+        )",
     )
     .execute(&pool)
     .await
@@ -36,15 +39,24 @@ async fn test_create_table_with_pk_and_nn() {
     let cnt: i64 = row.try_get("cnt").unwrap();
     assert_eq!(cnt, 1);
 
-    sqlx::query("DROP TABLE IF EXISTS test_schema_create").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_schema_create")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_alter_table_add_column() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_alter").execute(&pool).await.unwrap();
-    sqlx::query("CREATE TABLE test_alter (id INT PRIMARY KEY)").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_alter")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("CREATE TABLE test_alter (id INT PRIMARY KEY)")
+        .execute(&pool)
+        .await
+        .unwrap();
 
     sqlx::query("ALTER TABLE test_alter ADD COLUMN new_col VARCHAR(100)")
         .execute(&pool)
@@ -61,14 +73,20 @@ async fn test_alter_table_add_column() {
     let cnt: i64 = row.try_get("cnt").unwrap();
     assert_eq!(cnt, 1);
 
-    sqlx::query("DROP TABLE IF EXISTS test_alter").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_alter")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_alter_table_drop_column() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_drop_col").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_drop_col")
+        .execute(&pool)
+        .await
+        .unwrap();
     sqlx::query("CREATE TABLE test_drop_col (id INT PRIMARY KEY, to_drop VARCHAR(50))")
         .execute(&pool)
         .await
@@ -79,14 +97,20 @@ async fn test_alter_table_drop_column() {
         .await
         .expect("ALTER TABLE DROP COLUMN should succeed");
 
-    sqlx::query("DROP TABLE IF EXISTS test_drop_col").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_drop_col")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_add_and_drop_index() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_index").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_index")
+        .execute(&pool)
+        .await
+        .unwrap();
     sqlx::query("CREATE TABLE test_index (id INT PRIMARY KEY, email VARCHAR(255))")
         .execute(&pool)
         .await
@@ -102,15 +126,24 @@ async fn test_add_and_drop_index() {
         .await
         .expect("DROP INDEX should succeed");
 
-    sqlx::query("DROP TABLE IF EXISTS test_index").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_index")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_foreign_key() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_fk_child").execute(&pool).await.unwrap();
-    sqlx::query("DROP TABLE IF EXISTS test_fk_parent").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_fk_child")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_fk_parent")
+        .execute(&pool)
+        .await
+        .unwrap();
 
     sqlx::query("CREATE TABLE test_fk_parent (id INT PRIMARY KEY)")
         .execute(&pool)
@@ -128,21 +161,33 @@ async fn test_foreign_key() {
     .await
     .expect("CREATE TABLE with FK should succeed");
 
-    sqlx::query("DROP TABLE IF EXISTS test_fk_child").execute(&pool).await.unwrap();
-    sqlx::query("DROP TABLE IF EXISTS test_fk_parent").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_fk_child")
+        .execute(&pool)
+        .await
+        .unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_fk_parent")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_truncate_table() {
     let pool = get_pool().await;
-    sqlx::query("DROP TABLE IF EXISTS test_truncate").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_truncate")
+        .execute(&pool)
+        .await
+        .unwrap();
     sqlx::query("CREATE TABLE test_truncate (id INT AUTO_INCREMENT PRIMARY KEY)")
         .execute(&pool)
         .await
         .unwrap();
 
-    sqlx::query("INSERT INTO test_truncate VALUES (), (), ()").execute(&pool).await.unwrap();
+    sqlx::query("INSERT INTO test_truncate VALUES (), (), ()")
+        .execute(&pool)
+        .await
+        .unwrap();
 
     sqlx::query("TRUNCATE TABLE test_truncate")
         .execute(&pool)
@@ -156,6 +201,9 @@ async fn test_truncate_table() {
     let cnt: i64 = row.try_get("cnt").unwrap();
     assert_eq!(cnt, 0, "Table should be empty after TRUNCATE");
 
-    sqlx::query("DROP TABLE IF EXISTS test_truncate").execute(&pool).await.unwrap();
+    sqlx::query("DROP TABLE IF EXISTS test_truncate")
+        .execute(&pool)
+        .await
+        .unwrap();
     pool.close().await;
 }

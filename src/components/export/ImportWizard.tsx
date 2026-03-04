@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/select";
 import { tauriImportSql, tauriGetDatabases } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileImport,
+  faFolderOpen,
+  faSpinner,
+  faCircleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ImportWizardProps {
   connectionId: string;
@@ -113,7 +120,7 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b bg-card">
-        <i className="bx bx-import text-lg text-muted-foreground" />
+        <FontAwesomeIcon icon={faFileImport} className="text-lg text-muted-foreground" />
         <h2 className="font-semibold">Import Database</h2>
       </div>
 
@@ -194,7 +201,7 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
                 className="flex-1 h-9 px-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <Button variant="outline" onClick={handleBrowse}>
-                <i className="bx bx-folder-open" />
+                <FontAwesomeIcon icon={faFolderOpen} />
                 Browse...
               </Button>
             </div>
@@ -252,7 +259,7 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
           {/* Error */}
           {importError && (
             <div className="flex items-start gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-              <i className="bx bx-error-circle shrink-0 mt-0.5" />
+              <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0 mt-0.5" />
               <span>{importError}</span>
             </div>
           )}
@@ -268,9 +275,9 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
             className="w-full"
           >
             {isImporting ? (
-              <><i className="bx bx-loader-alt animate-spin" />Importing...</>
+              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Importing...</>
             ) : (
-              <><i className="bx bx-import" />Start Import</>
+              <><FontAwesomeIcon icon={faFileImport} />Start Import</>
             )}
           </Button>
         </div>

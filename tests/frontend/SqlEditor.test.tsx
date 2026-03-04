@@ -169,7 +169,7 @@ describe("SqlSheet / SqlEditor", () => {
     await user.click(screen.getByRole("button", { name: /execute/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/executing/i)).toBeInTheDocument();
+      expect(screen.getByText(/running/i)).toBeInTheDocument();
     });
 
     resolveQuery!({

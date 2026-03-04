@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/select";
 import { tauriExportDatabase, tauriGetDatabases } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faFileExport,
+  faFolderOpen,
+  faSpinner,
+  faCircleCheck,
+  faCircleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ExportWizardProps {
   connectionId: string;
@@ -150,7 +158,7 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
     <div className="flex flex-col h-full bg-background">
       {/* Header */}
       <div className="flex items-center gap-3 px-4 py-3 border-b bg-card">
-        <i className="bx bx-export text-lg text-muted-foreground" />
+        <FontAwesomeIcon icon={faFileExport} className="text-lg text-muted-foreground" />
         <h2 className="font-semibold">Export Database</h2>
       </div>
 
@@ -303,7 +311,7 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
                 className="flex-1 h-9 px-3 text-sm rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <Button variant="outline" onClick={handleBrowse}>
-                <i className="bx bx-folder-open" />
+                <FontAwesomeIcon icon={faFolderOpen} />
                 Browse...
               </Button>
             </div>
@@ -323,7 +331,7 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
           {/* Done */}
           {exportDone && (
             <div className="flex items-center gap-2 rounded-md bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-sm text-emerald-600 dark:text-emerald-400">
-              <i className="bx bx-check-circle" />
+              <FontAwesomeIcon icon={faCircleCheck} />
               <span>Export completed successfully —</span>
               <button
                 className="underline hover:no-underline"
@@ -340,7 +348,7 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
           {/* Error */}
           {exportError && (
             <div className="flex items-start gap-2 rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-              <i className="bx bx-error-circle shrink-0 mt-0.5" />
+              <FontAwesomeIcon icon={faCircleExclamation} className="shrink-0 mt-0.5" />
               <span>{exportError}</span>
             </div>
           )}
@@ -352,9 +360,9 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
             className="w-full"
           >
             {isExporting ? (
-              <><i className="bx bx-loader-alt animate-spin" />Exporting...</>
+              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Exporting...</>
             ) : (
-              <><i className="bx bx-export" />Start Export</>
+              <><FontAwesomeIcon icon={faFileExport} />Start Export</>
             )}
           </Button>
         </div>

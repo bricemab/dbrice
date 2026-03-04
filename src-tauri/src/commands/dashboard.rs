@@ -36,7 +36,7 @@ pub async fn get_server_status(connection_id: String) -> Result<ServerStatus, St
             'Uptime', 'Threads_connected', 'Threads_running', 'Queries',
             'Slow_queries', 'Bytes_received', 'Bytes_sent',
             'Innodb_data_reads', 'Innodb_data_writes'
-        )"
+        )",
     )
     .fetch_all(&pool)
     .await
@@ -61,15 +61,37 @@ pub async fn get_server_status(connection_id: String) -> Result<ServerStatus, St
         .unwrap_or(151);
 
     let uptime: u64 = vars.get("Uptime").and_then(|v| v.parse().ok()).unwrap_or(0);
-    let threads_connected: u64 = vars.get("Threads_connected").and_then(|v| v.parse().ok()).unwrap_or(0);
-    let threads_running: u64 = vars.get("Threads_running").and_then(|v| v.parse().ok()).unwrap_or(0);
-    let slow_queries: u64 = vars.get("Slow_queries").and_then(|v| v.parse().ok()).unwrap_or(0);
-    let bytes_received: u64 = vars.get("Bytes_received").and_then(|v| v.parse().ok()).unwrap_or(0);
-    let bytes_sent: u64 = vars.get("Bytes_sent").and_then(|v| v.parse().ok()).unwrap_or(0);
+    let threads_connected: u64 = vars
+        .get("Threads_connected")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let threads_running: u64 = vars
+        .get("Threads_running")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let slow_queries: u64 = vars
+        .get("Slow_queries")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let bytes_received: u64 = vars
+        .get("Bytes_received")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
+    let bytes_sent: u64 = vars
+        .get("Bytes_sent")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0);
 
     // Rough queries/sec estimate using uptime
-    let queries: f64 = vars.get("Queries").and_then(|v| v.parse().ok()).unwrap_or(0.0);
-    let qps = if uptime > 0 { queries / uptime as f64 } else { 0.0 };
+    let queries: f64 = vars
+        .get("Queries")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(0.0);
+    let qps = if uptime > 0 {
+        queries / uptime as f64
+    } else {
+        0.0
+    };
 
     Ok(ServerStatus {
         version,
@@ -155,21 +177,26 @@ pub async fn get_slow_queries(connection_id: String) -> Result<Vec<SlowQueryInfo
          FROM performance_schema.events_statements_summary_by_digest
          WHERE AVG_TIMER_WAIT > 1000000000000
          ORDER BY AVG_TIMER_WAIT DESC
-         LIMIT 20"
+         LIMIT 20",
     )
     .fetch_all(&pool)
     .await;
 
     match result {
-        Ok(rows) => {
-            Ok(rows.iter().filter_map(|r| {
+        Ok(rows) => Ok(rows
+            .iter()
+            .filter_map(|r| {
                 Some(SlowQueryInfo {
-                    sql: r.try_get::<Option<String>, _>(0).ok().flatten().unwrap_or_default(),
+                    sql: r
+                        .try_get::<Option<String>, _>(0)
+                        .ok()
+                        .flatten()
+                        .unwrap_or_default(),
                     execution_count: r.try_get::<u64, _>(1).ok()?,
                     avg_time: r.try_get::<f64, _>(2).ok()?,
                 })
-            }).collect())
-        }
+            })
+            .collect()),
         Err(_) => Ok(Vec::new()),
     }
 }
@@ -193,17 +220,20 @@ pub async fn get_database_sizes(connection_id: String) -> Result<Vec<DatabaseSiz
          FROM information_schema.tables
          WHERE table_schema NOT IN ('information_schema', 'performance_schema', 'sys')
          GROUP BY table_schema
-         ORDER BY size_mb DESC"
+         ORDER BY size_mb DESC",
     )
     .fetch_all(&pool)
     .await
     .map_err(|e| e.to_string())?;
 
-    Ok(rows.iter().filter_map(|r| {
-        Some(DatabaseSize {
-            name: r.try_get::<String, _>(0).ok()?,
-            size_mb: r.try_get::<f64, _>(1).ok().unwrap_or(0.0),
-            tables_count: r.try_get::<i64, _>(2).ok()? as u64,
+    Ok(rows
+        .iter()
+        .filter_map(|r| {
+            Some(DatabaseSize {
+                name: r.try_get::<String, _>(0).ok()?,
+                size_mb: r.try_get::<f64, _>(1).ok().unwrap_or(0.0),
+                tables_count: r.try_get::<i64, _>(2).ok()? as u64,
+            })
         })
-    }).collect())
+        .collect())
 }

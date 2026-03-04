@@ -27,7 +27,7 @@ async fn test_create_user() {
 
     // Verify user exists
     let row = sqlx::query(
-        "SELECT user, host FROM mysql.user WHERE user = 'test_integration_user' AND host = '%'"
+        "SELECT user, host FROM mysql.user WHERE user = 'test_integration_user' AND host = '%'",
     )
     .fetch_one(&pool)
     .await
@@ -71,12 +71,10 @@ async fn test_grant_and_revoke_privileges() {
         .expect("Should flush privileges");
 
     // Verify privilege was granted
-    let rows = sqlx::query(
-        "SHOW GRANTS FOR 'priv_test_user'@'%'"
-    )
-    .fetch_all(&pool)
-    .await
-    .expect("Should show grants");
+    let rows = sqlx::query("SHOW GRANTS FOR 'priv_test_user'@'%'")
+        .fetch_all(&pool)
+        .await
+        .expect("Should show grants");
 
     let has_select = rows.iter().any(|row| {
         let grant: String = row.try_get(0).unwrap_or_default();

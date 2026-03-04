@@ -8,8 +8,8 @@ pub struct ExportOptions {
     pub connection_id: String,
     pub database: String,
     pub tables: Vec<String>,
-    pub export_type: String,    // "structure", "data", "both"
-    pub format: String,         // "sql", "csv", "json"
+    pub export_type: String, // "structure", "data", "both"
+    pub format: String,      // "sql", "csv", "json"
     pub output_path: String,
     pub include_drop_table: bool,
     pub include_create_database: bool,
@@ -31,19 +31,28 @@ pub async fn export_database(options: ExportOptions) -> Result<String, String> {
     }
 }
 
-async fn export_sql(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> Result<String, String> {
+async fn export_sql(
+    pool: &sqlx::Pool<sqlx::MySql>,
+    options: &ExportOptions,
+) -> Result<String, String> {
     let mut output = String::new();
 
     output.push_str("-- DBrice Export\n");
     output.push_str(&format!("-- Database: {}\n", options.database));
-    output.push_str(&format!("-- Date: {}\n\n", chrono::Utc::now().format("%Y-%m-%d %H:%M:%S")));
+    output.push_str(&format!(
+        "-- Date: {}\n\n",
+        chrono::Utc::now().format("%Y-%m-%d %H:%M:%S")
+    ));
 
     if options.disable_fk_checks {
         output.push_str("SET FOREIGN_KEY_CHECKS=0;\n\n");
     }
 
     if options.include_create_database {
-        output.push_str(&format!("CREATE DATABASE IF NOT EXISTS `{}`;\n", options.database));
+        output.push_str(&format!(
+            "CREATE DATABASE IF NOT EXISTS `{}`;\n",
+            options.database
+        ));
         output.push_str(&format!("USE `{}`;\n\n", options.database));
     }
 
@@ -54,10 +63,13 @@ async fn export_sql(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> 
     for table in &options.tables {
         if options.export_type == "structure" || options.export_type == "both" {
             // Get CREATE TABLE statement
-            let row = sqlx::query::<MySql>(&format!("SHOW CREATE TABLE `{}`.`{}`", options.database, table))
-                .fetch_one(pool)
-                .await
-                .map_err(|e| e.to_string())?;
+            let row = sqlx::query::<MySql>(&format!(
+                "SHOW CREATE TABLE `{}`.`{}`",
+                options.database, table
+            ))
+            .fetch_one(pool)
+            .await
+            .map_err(|e| e.to_string())?;
 
             let create_stmt: String = row.try_get(1).map_err(|e| e.to_string())?;
 
@@ -70,21 +82,20 @@ async fn export_sql(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> 
 
         if options.export_type == "data" || options.export_type == "both" {
             // Get all rows
-            let rows = sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
-                .fetch_all(pool)
-                .await
-                .map_err(|e| e.to_string())?;
+            let rows =
+                sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
+                    .fetch_all(pool)
+                    .await
+                    .map_err(|e| e.to_string())?;
 
             if !rows.is_empty() {
                 output.push_str(&format!("-- Data for table `{}`\n", table));
                 for row in &rows {
                     let values: Vec<String> = (0..row.len())
-                        .map(|i| {
-                            match row.try_get::<Option<String>, _>(i) {
-                                Ok(Some(v)) => format!("'{}'", v.replace('\'', "\\'")),
-                                Ok(None) => "NULL".to_string(),
-                                Err(_) => "NULL".to_string(),
-                            }
+                        .map(|i| match row.try_get::<Option<String>, _>(i) {
+                            Ok(Some(v)) => format!("'{}'", v.replace('\'', "\\'")),
+                            Ok(None) => "NULL".to_string(),
+                            Err(_) => "NULL".to_string(),
                         })
                         .collect();
                     output.push_str(&format!(
@@ -109,25 +120,36 @@ async fn export_sql(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> 
     // Write to file
     std::fs::write(&options.output_path, &output).map_err(|e| e.to_string())?;
 
-    Ok(format!("Export completed successfully: {}", options.output_path))
+    Ok(format!(
+        "Export completed successfully: {}",
+        options.output_path
+    ))
 }
 
-async fn export_csv(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> Result<String, String> {
+async fn export_csv(
+    pool: &sqlx::Pool<sqlx::MySql>,
+    options: &ExportOptions,
+) -> Result<String, String> {
     let separator = options.csv_separator.as_deref().unwrap_or(";");
     let output_dir = std::path::Path::new(&options.output_path);
     std::fs::create_dir_all(output_dir).map_err(|e| e.to_string())?;
 
     for table in &options.tables {
-        let rows = sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
-            .fetch_all(pool)
-            .await
-            .map_err(|e| e.to_string())?;
+        let rows =
+            sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
+                .fetch_all(pool)
+                .await
+                .map_err(|e| e.to_string())?;
 
         let file_path = output_dir.join(format!("{}.csv", table));
         let mut file = std::fs::File::create(&file_path).map_err(|e| e.to_string())?;
 
         if let Some(first_row) = rows.first() {
-            let headers: Vec<String> = first_row.columns().iter().map(|c| c.name().to_string()).collect();
+            let headers: Vec<String> = first_row
+                .columns()
+                .iter()
+                .map(|c| c.name().to_string())
+                .collect();
             writeln!(file, "{}", headers.join(separator)).map_err(|e| e.to_string())?;
         }
 
@@ -147,15 +169,19 @@ async fn export_csv(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> 
     Ok(format!("CSV export completed: {}", options.output_path))
 }
 
-async fn export_json(pool: &sqlx::Pool<sqlx::MySql>, options: &ExportOptions) -> Result<String, String> {
+async fn export_json(
+    pool: &sqlx::Pool<sqlx::MySql>,
+    options: &ExportOptions,
+) -> Result<String, String> {
     let output_dir = std::path::Path::new(&options.output_path);
     std::fs::create_dir_all(output_dir).map_err(|e| e.to_string())?;
 
     for table in &options.tables {
-        let rows = sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
-            .fetch_all(pool)
-            .await
-            .map_err(|e| e.to_string())?;
+        let rows =
+            sqlx::query::<MySql>(&format!("SELECT * FROM `{}`.`{}`", options.database, table))
+                .fetch_all(pool)
+                .await
+                .map_err(|e| e.to_string())?;
 
         let mut json_rows = Vec::new();
         for row in &rows {

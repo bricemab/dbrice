@@ -1,10 +1,10 @@
+use aes_gcm::aead::rand_core::RngCore;
 use aes_gcm::{
     aead::{Aead, KeyInit, OsRng},
     Aes256Gcm, Key, Nonce,
 };
-use aes_gcm::aead::rand_core::RngCore;
 use anyhow::{Context, Result};
-use base64::{Engine as _, engine::general_purpose::STANDARD as B64};
+use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use pbkdf2::pbkdf2_hmac;
 use sha2::Sha256;
 
@@ -56,7 +56,9 @@ pub fn decrypt(encoded: &str, password: &str) -> Result<String> {
 
     let salt = B64.decode(parts[0]).context("Invalid salt encoding")?;
     let nonce_bytes = B64.decode(parts[1]).context("Invalid nonce encoding")?;
-    let ciphertext = B64.decode(parts[2]).context("Invalid ciphertext encoding")?;
+    let ciphertext = B64
+        .decode(parts[2])
+        .context("Invalid ciphertext encoding")?;
 
     let key_bytes = derive_key(password, &salt);
     let key = Key::<Aes256Gcm>::from_slice(&key_bytes);

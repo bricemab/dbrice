@@ -5,17 +5,16 @@ const SERVICE_NAME: &str = "DBrice";
 
 /// Store a secret in the OS keychain
 pub fn store_secret(key: &str, value: &str) -> Result<()> {
-    let entry = Entry::new(SERVICE_NAME, key)
-        .context("Failed to create keychain entry")?;
-    entry.set_password(value)
+    let entry = Entry::new(SERVICE_NAME, key).context("Failed to create keychain entry")?;
+    entry
+        .set_password(value)
         .context("Failed to store secret in keychain")?;
     Ok(())
 }
 
 /// Retrieve a secret from the OS keychain
 pub fn get_secret(key: &str) -> Result<Option<String>> {
-    let entry = Entry::new(SERVICE_NAME, key)
-        .context("Failed to create keychain entry")?;
+    let entry = Entry::new(SERVICE_NAME, key).context("Failed to create keychain entry")?;
     match entry.get_password() {
         Ok(password) => Ok(Some(password)),
         Err(keyring::Error::NoEntry) => Ok(None),
@@ -25,12 +24,14 @@ pub fn get_secret(key: &str) -> Result<Option<String>> {
 
 /// Delete a secret from the OS keychain
 pub fn delete_secret(key: &str) -> Result<()> {
-    let entry = Entry::new(SERVICE_NAME, key)
-        .context("Failed to create keychain entry")?;
+    let entry = Entry::new(SERVICE_NAME, key).context("Failed to create keychain entry")?;
     match entry.delete_credential() {
         Ok(()) => Ok(()),
         Err(keyring::Error::NoEntry) => Ok(()),
-        Err(e) => Err(anyhow::anyhow!("Failed to delete secret from keychain: {}", e)),
+        Err(e) => Err(anyhow::anyhow!(
+            "Failed to delete secret from keychain: {}",
+            e
+        )),
     }
 }
 

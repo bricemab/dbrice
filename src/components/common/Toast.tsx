@@ -1,6 +1,15 @@
 import { create } from "zustand";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCircleCheck,
+  faCircleExclamation,
+  faTriangleExclamation,
+  faCircleInfo,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -61,11 +70,11 @@ function ToastItem({ item }: { item: ToastItem }) {
     return undefined;
   }, [item.id, item.persistent, removeToast]);
 
-  const icons: Record<ToastType, string> = {
-    success: "bx-check-circle",
-    error: "bx-x-circle",
-    warning: "bx-error",
-    info: "bx-info-circle",
+  const icons: Record<ToastType, IconDefinition> = {
+    success: faCircleCheck,
+    error: faCircleExclamation,
+    warning: faTriangleExclamation,
+    info: faCircleInfo,
   };
 
   const styles: Record<ToastType, string> = {
@@ -83,7 +92,7 @@ function ToastItem({ item }: { item: ToastItem }) {
         "min-w-[300px] max-w-[400px]",
       )}
     >
-      <i className={cn("bx text-lg mt-0.5", icons[item.type], styles[item.type])} />
+      <FontAwesomeIcon icon={icons[item.type]} className={cn("text-lg mt-0.5", styles[item.type])} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{item.title}</p>
         {item.description && (
@@ -94,7 +103,7 @@ function ToastItem({ item }: { item: ToastItem }) {
         onClick={() => removeToast(item.id)}
         className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
       >
-        <i className="bx bx-x text-lg" />
+        <FontAwesomeIcon icon={faXmark} className="text-lg" />
       </button>
     </div>
   );

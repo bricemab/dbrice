@@ -13,6 +13,8 @@ import { UserManager } from "@/components/users/UserManager";
 import { ExportWizard } from "@/components/export/ExportWizard";
 import { ImportWizard } from "@/components/export/ImportWizard";
 import { LogsPanel } from "@/components/logs/LogsPanel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileCode } from "@fortawesome/free-solid-svg-icons";
 
 interface WorkspacePageProps {
   connectionId: string;
@@ -30,7 +32,7 @@ export function WorkspacePage({ connectionId }: WorkspacePageProps) {
       return (
         <div className="flex h-full items-center justify-center text-muted-foreground">
           <div className="text-center space-y-2">
-            <i className="bx bx-code-alt text-4xl block" />
+            <FontAwesomeIcon icon={faFileCode} className="text-4xl block" />
             <p className="text-sm">No tab open. Use the menu above to get started.</p>
           </div>
         </div>

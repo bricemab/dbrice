@@ -1,10 +1,10 @@
 use anyhow::{Context, Result};
+use once_cell::sync::Lazy;
 use ssh2::Session;
 use std::collections::HashMap;
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use once_cell::sync::Lazy;
 
 static TUNNELS: Lazy<Mutex<HashMap<String, TunnelHandle>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -38,7 +38,12 @@ pub fn establish_tunnel(config: TunnelConfig) -> Result<u16> {
 
     // Establish SSH connection
     let tcp = TcpStream::connect(format!("{}:{}", config.ssh_hostname, config.ssh_port))
-        .with_context(|| format!("Failed to connect to SSH host {}:{}", config.ssh_hostname, config.ssh_port))?;
+        .with_context(|| {
+            format!(
+                "Failed to connect to SSH host {}:{}",
+                config.ssh_hostname, config.ssh_port
+            )
+        })?;
 
     let mut session = Session::new().context("Failed to create SSH session")?;
     session.set_tcp_stream(tcp);
@@ -123,10 +128,15 @@ pub fn establish_tunnel(config: TunnelConfig) -> Result<u16> {
     });
 
     // Store handle
-    let mut tunnels = TUNNELS.lock().map_err(|e| anyhow::anyhow!("Lock error: {}", e))?;
+    let mut tunnels = TUNNELS
+        .lock()
+        .map_err(|e| anyhow::anyhow!("Lock error: {}", e))?;
     tunnels.insert(
         config.connection_id.clone(),
-        TunnelHandle { local_port, stop_tx },
+        TunnelHandle {
+            local_port,
+            stop_tx,
+        },
     );
 
     Ok(local_port)
@@ -134,7 +144,9 @@ pub fn establish_tunnel(config: TunnelConfig) -> Result<u16> {
 
 /// Close an SSH tunnel by connection ID
 pub fn close_tunnel(connection_id: &str) -> Result<()> {
-    let mut tunnels = TUNNELS.lock().map_err(|e| anyhow::anyhow!("Lock error: {}", e))?;
+    let mut tunnels = TUNNELS
+        .lock()
+        .map_err(|e| anyhow::anyhow!("Lock error: {}", e))?;
     if let Some(handle) = tunnels.remove(connection_id) {
         let _ = handle.stop_tx.send(());
     }

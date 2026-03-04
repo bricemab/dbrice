@@ -31,7 +31,9 @@ pub async fn get_routine_definition(
         "SELECT ROUTINE_NAME, ROUTINE_TYPE, ROUTINE_DEFINITION
          FROM information_schema.ROUTINES
          WHERE ROUTINE_SCHEMA = '{}' AND ROUTINE_NAME = '{}' AND ROUTINE_TYPE = '{}'",
-        database, name, routine_type.to_uppercase()
+        database,
+        name,
+        routine_type.to_uppercase()
     ))
     .fetch_one(&pool)
     .await
@@ -57,7 +59,11 @@ pub async fn get_routine_definition(
             }
             Some(RoutineParamInfo {
                 name: param_name,
-                mode: r.try_get::<Option<String>, _>(1).ok().flatten().unwrap_or_else(|| "IN".to_string()),
+                mode: r
+                    .try_get::<Option<String>, _>(1)
+                    .ok()
+                    .flatten()
+                    .unwrap_or_else(|| "IN".to_string()),
                 data_type: r.try_get::<String, _>(2).ok()?,
             })
         })
@@ -66,16 +72,16 @@ pub async fn get_routine_definition(
     Ok(RoutineInfo {
         name: row.try_get(0).map_err(|e| e.to_string())?,
         routine_type: row.try_get(1).map_err(|e| e.to_string())?,
-        definition: row.try_get::<Option<String>, _>(2).map_err(|e| e.to_string())?.unwrap_or_default(),
+        definition: row
+            .try_get::<Option<String>, _>(2)
+            .map_err(|e| e.to_string())?
+            .unwrap_or_default(),
         parameters,
     })
 }
 
 #[command]
-pub async fn save_routine(
-    connection_id: String,
-    sql: String,
-) -> Result<(), String> {
+pub async fn save_routine(connection_id: String, sql: String) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -98,10 +104,15 @@ pub async fn drop_routine(
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
-    sqlx::query::<MySql>(&format!("DROP {} IF EXISTS `{}`.`{}`", routine_type.to_uppercase(), database, name))
-        .execute(&pool)
-        .await
-        .map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&format!(
+        "DROP {} IF EXISTS `{}`.`{}`",
+        routine_type.to_uppercase(),
+        database,
+        name
+    ))
+    .execute(&pool)
+    .await
+    .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -115,8 +126,11 @@ pub struct ExecuteRoutineInput {
 }
 
 #[command]
-pub async fn execute_routine(input: ExecuteRoutineInput) -> Result<crate::models::query::QueryResult, String> {
-    let params_str = input.params
+pub async fn execute_routine(
+    input: ExecuteRoutineInput,
+) -> Result<crate::models::query::QueryResult, String> {
+    let params_str = input
+        .params
         .iter()
         .map(|p| format!("'{}'", p.replace('\'', "\\'")))
         .collect::<Vec<_>>()
@@ -125,7 +139,10 @@ pub async fn execute_routine(input: ExecuteRoutineInput) -> Result<crate::models
     let sql = if input.routine_type.to_uppercase() == "PROCEDURE" {
         format!("CALL `{}`.`{}`({})", input.database, input.name, params_str)
     } else {
-        format!("SELECT `{}`.`{}`({})", input.database, input.name, params_str)
+        format!(
+            "SELECT `{}`.`{}`({})",
+            input.database, input.name, params_str
+        )
     };
 
     crate::commands::mysql::execute_query(crate::commands::mysql::ExecuteQueryInput {

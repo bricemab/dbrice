@@ -1,19 +1,33 @@
 import { useTabStore } from "@/stores/useTabStore";
 import { cn } from "@/lib/utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  faFileCode,
+  faTable,
+  faCode,
+  faChartBar,
+  faUser,
+  faFileExport,
+  faFileImport,
+  faList,
+  faFile,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface WorkspaceTabsProps {
   connectionId: string;
 }
 
-const TAB_ICONS: Record<string, string> = {
-  "sql-sheet": "bx-code-alt",
-  "table-designer": "bx-table",
-  "routine-editor": "bx-code-block",
-  dashboard: "bx-bar-chart-alt-2",
-  users: "bx-user",
-  export: "bx-export",
-  import: "bx-import",
-  logs: "bx-list-ul",
+const TAB_ICONS: Record<string, IconDefinition> = {
+  "sql-sheet": faFileCode,
+  "table-designer": faTable,
+  "routine-editor": faCode,
+  dashboard: faChartBar,
+  users: faUser,
+  export: faFileExport,
+  import: faFileImport,
+  logs: faList,
 };
 
 export function WorkspaceTabs({ connectionId }: WorkspaceTabsProps) {
@@ -25,6 +39,7 @@ export function WorkspaceTabs({ connectionId }: WorkspaceTabsProps) {
     <div className="flex items-center h-8 border-b bg-background overflow-x-auto shrink-0">
       {ct.workspaceTabs.map((tab) => {
         const isActive = ct.activeWorkspaceTabId === tab.id;
+        const tabIcon = TAB_ICONS[tab.type] ?? faFile;
         return (
           <button
             key={tab.id}
@@ -36,7 +51,7 @@ export function WorkspaceTabs({ connectionId }: WorkspaceTabsProps) {
             )}
             onClick={() => setActiveWorkspaceTab(connectionId, tab.id)}
           >
-            <i className={`bx ${TAB_ICONS[tab.type] ?? "bx-file"} text-sm`} />
+            <FontAwesomeIcon icon={tabIcon} className="text-sm" />
             <span>{tab.title}</span>
             {tab.isDirty && <span className="text-primary">●</span>}
             <button
@@ -46,7 +61,7 @@ export function WorkspaceTabs({ connectionId }: WorkspaceTabsProps) {
                 closeWorkspaceTab(connectionId, tab.id);
               }}
             >
-              <i className="bx bx-x text-[10px]" />
+              <FontAwesomeIcon icon={faXmark} className="text-[10px]" />
             </button>
           </button>
         );

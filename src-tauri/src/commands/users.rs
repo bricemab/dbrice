@@ -56,20 +56,40 @@ pub async fn create_user(connection_id: String, input: CreateUserInput) -> Resul
         .ok_or_else(|| "Not connected".to_string())?;
 
     let password_clause = if let Some(ref pwd) = input.password {
-        format!(" IDENTIFIED WITH {} BY '{}'", input.plugin, pwd.replace('\'', "\\'"))
+        format!(
+            " IDENTIFIED WITH {} BY '{}'",
+            input.plugin,
+            pwd.replace('\'', "\\'")
+        )
     } else {
         format!(" IDENTIFIED WITH {}", input.plugin)
     };
 
-    let ssl_clause = if input.require_ssl { " REQUIRE SSL" } else { "" };
+    let ssl_clause = if input.require_ssl {
+        " REQUIRE SSL"
+    } else {
+        ""
+    };
 
     let limits_clause = {
         let mut parts = Vec::new();
-        if let Some(v) = input.max_queries_per_hour { parts.push(format!("MAX_QUERIES_PER_HOUR {}", v)); }
-        if let Some(v) = input.max_updates_per_hour { parts.push(format!("MAX_UPDATES_PER_HOUR {}", v)); }
-        if let Some(v) = input.max_connections_per_hour { parts.push(format!("MAX_CONNECTIONS_PER_HOUR {}", v)); }
-        if let Some(v) = input.max_user_connections { parts.push(format!("MAX_USER_CONNECTIONS {}", v)); }
-        if parts.is_empty() { String::new() } else { format!(" WITH {}", parts.join(" ")) }
+        if let Some(v) = input.max_queries_per_hour {
+            parts.push(format!("MAX_QUERIES_PER_HOUR {}", v));
+        }
+        if let Some(v) = input.max_updates_per_hour {
+            parts.push(format!("MAX_UPDATES_PER_HOUR {}", v));
+        }
+        if let Some(v) = input.max_connections_per_hour {
+            parts.push(format!("MAX_CONNECTIONS_PER_HOUR {}", v));
+        }
+        if let Some(v) = input.max_user_connections {
+            parts.push(format!("MAX_USER_CONNECTIONS {}", v));
+        }
+        if parts.is_empty() {
+            String::new()
+        } else {
+            format!(" WITH {}", parts.join(" "))
+        }
     };
 
     let sql = format!(
@@ -77,12 +97,20 @@ pub async fn create_user(connection_id: String, input: CreateUserInput) -> Resul
         input.user, input.host, password_clause, ssl_clause, limits_clause
     );
 
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[command]
-pub async fn update_user(connection_id: String, original_user: String, original_host: String, input: CreateUserInput) -> Result<(), String> {
+pub async fn update_user(
+    connection_id: String,
+    original_user: String,
+    original_host: String,
+    input: CreateUserInput,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -90,9 +118,15 @@ pub async fn update_user(connection_id: String, original_user: String, original_
     if let Some(ref pwd) = input.password {
         let sql = format!(
             "ALTER USER '{}'@'{}' IDENTIFIED WITH {} BY '{}'",
-            original_user, original_host, input.plugin, pwd.replace('\'', "\\'")
+            original_user,
+            original_host,
+            input.plugin,
+            pwd.replace('\'', "\\'")
         );
-        sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+        sqlx::query::<MySql>(&sql)
+            .execute(&pool)
+            .await
+            .map_err(|e| e.to_string())?;
     }
 
     // Rename user if changed
@@ -101,7 +135,10 @@ pub async fn update_user(connection_id: String, original_user: String, original_
             "RENAME USER '{}'@'{}' TO '{}'@'{}'",
             original_user, original_host, input.user, input.host
         );
-        sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+        sqlx::query::<MySql>(&sql)
+            .execute(&pool)
+            .await
+            .map_err(|e| e.to_string())?;
     }
 
     Ok(())
@@ -119,7 +156,11 @@ pub async fn delete_user(connection_id: String, user: String, host: String) -> R
 }
 
 #[command]
-pub async fn get_user_privileges(connection_id: String, user: String, host: String) -> Result<serde_json::Value, String> {
+pub async fn get_user_privileges(
+    connection_id: String,
+    user: String,
+    host: String,
+) -> Result<serde_json::Value, String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -147,7 +188,10 @@ pub struct GrantPrivilegesInput {
 }
 
 #[command]
-pub async fn grant_privileges(connection_id: String, input: GrantPrivilegesInput) -> Result<(), String> {
+pub async fn grant_privileges(
+    connection_id: String,
+    input: GrantPrivilegesInput,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -158,20 +202,33 @@ pub async fn grant_privileges(connection_id: String, input: GrantPrivilegesInput
         _ => "*.*".to_string(),
     };
 
-    let with_grant = if input.grant_option { " WITH GRANT OPTION" } else { "" };
+    let with_grant = if input.grant_option {
+        " WITH GRANT OPTION"
+    } else {
+        ""
+    };
 
     let sql = format!(
         "GRANT {} ON {} TO '{}'@'{}'{}",
         privs, target, input.user, input.host, with_grant
     );
 
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
-    sqlx::query::<MySql>("FLUSH PRIVILEGES").execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>("FLUSH PRIVILEGES")
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[command]
-pub async fn revoke_privileges(connection_id: String, input: GrantPrivilegesInput) -> Result<(), String> {
+pub async fn revoke_privileges(
+    connection_id: String,
+    input: GrantPrivilegesInput,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -187,7 +244,13 @@ pub async fn revoke_privileges(connection_id: String, input: GrantPrivilegesInpu
         privs, target, input.user, input.host
     );
 
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
-    sqlx::query::<MySql>("FLUSH PRIVILEGES").execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>("FLUSH PRIVILEGES")
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }

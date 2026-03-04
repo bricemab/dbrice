@@ -13,6 +13,25 @@ import {
 import { toast } from "@/components/common/Toast";
 import { cn } from "@/lib/utils";
 import type { ColumnInfo } from "@/types/mysql";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  faFolder,
+  faFolderOpen,
+  faChevronRight,
+  faTable,
+  faTableColumns,
+  faEye,
+  faCode,
+  faCalculator,
+  faCalendar,
+  faCopy,
+  faFileCode,
+  faPlus,
+  faFileExport,
+  faTrash,
+  faPen,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface SidebarTreeProps {
   connectionId: string;
@@ -199,16 +218,15 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
               onClick={() => toggleDb(db)}
               onContextMenu={(e) => handleDbContextMenu(e, db.name)}
             >
-              <i
-                className={cn(
-                  "bx text-yellow-500 text-base shrink-0",
-                  dbExpanded ? "bx-folder-open" : "bx-folder",
-                )}
+              <FontAwesomeIcon
+                icon={dbExpanded ? faFolderOpen : faFolder}
+                className="text-yellow-500 text-base shrink-0"
               />
               <span className="font-medium truncate flex-1">{db.name}</span>
-              <i
+              <FontAwesomeIcon
+                icon={faChevronRight}
                 className={cn(
-                  "bx bx-chevron-right text-muted-foreground text-xs transition-transform",
+                  "text-muted-foreground text-xs transition-transform",
                   dbExpanded && "rotate-90",
                 )}
               />
@@ -220,7 +238,7 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 {/* Tables */}
                 <SectionNode
                   label="Tables"
-                  icon="bx-table"
+                  icon={faTable}
                   nodeId={`section:${db.name}:tables`}
                   expanded={expandedNodes.has(`section:${db.name}:tables`)}
                   onToggle={toggleSection}
@@ -241,11 +259,12 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                           onClick={() => toggleTable(db.name, table)}
                           onContextMenu={(e) => handleTableContextMenu(e, db.name, table.name)}
                         >
-                          <i className="bx bx-table text-blue-500 text-sm shrink-0" />
+                          <FontAwesomeIcon icon={faTable} className="text-blue-500 text-sm shrink-0" />
                           <span className="truncate flex-1">{table.name}</span>
-                          <i
+                          <FontAwesomeIcon
+                            icon={faChevronRight}
                             className={cn(
-                              "bx bx-chevron-right text-muted-foreground text-[10px] transition-transform opacity-0 group-hover:opacity-100",
+                              "text-muted-foreground text-[10px] transition-transform opacity-0 group-hover:opacity-100",
                               tableExpanded && "rotate-90 opacity-100",
                             )}
                           />
@@ -261,7 +280,7 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                                   key={col.name}
                                   className="flex items-center gap-1 px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 rounded-sm cursor-default"
                                 >
-                                  <i className="bx bx-columns text-[10px] shrink-0" />
+                                  <FontAwesomeIcon icon={faTableColumns} className="text-[10px] shrink-0" />
                                   <span className="truncate">{col.name}</span>
                                   <div className="flex gap-0.5 ml-auto shrink-0">
                                     {badges.map((b) => (
@@ -292,14 +311,14 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 {(db.views?.length ?? 0) > 0 && (
                   <SectionNode
                     label="Views"
-                    icon="bx-show"
+                    icon={faEye}
                     nodeId={`section:${db.name}:views`}
                     expanded={expandedNodes.has(`section:${db.name}:views`)}
                     onToggle={toggleSection}
                     count={db.views?.length ?? 0}
                   >
                     {db.views?.map((v) => (
-                      <RoutineItem key={v} icon="bx-show" name={v} color="text-purple-500" />
+                      <RoutineItem key={v} icon={faEye} name={v} color="text-purple-500" />
                     ))}
                   </SectionNode>
                 )}
@@ -308,14 +327,14 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 {(db.procedures?.length ?? 0) > 0 && (
                   <SectionNode
                     label="Stored Procedures"
-                    icon="bx-code-block"
+                    icon={faCode}
                     nodeId={`section:${db.name}:procedures`}
                     expanded={expandedNodes.has(`section:${db.name}:procedures`)}
                     onToggle={toggleSection}
                     count={db.procedures?.length ?? 0}
                   >
                     {db.procedures?.map((p) => (
-                      <RoutineItem key={p} icon="bx-code-block" name={p} color="text-orange-500" />
+                      <RoutineItem key={p} icon={faCode} name={p} color="text-orange-500" />
                     ))}
                   </SectionNode>
                 )}
@@ -324,14 +343,14 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 {(db.functions?.length ?? 0) > 0 && (
                   <SectionNode
                     label="Functions"
-                    icon="bx-math"
+                    icon={faCalculator}
                     nodeId={`section:${db.name}:functions`}
                     expanded={expandedNodes.has(`section:${db.name}:functions`)}
                     onToggle={toggleSection}
                     count={db.functions?.length ?? 0}
                   >
                     {db.functions?.map((f) => (
-                      <RoutineItem key={f} icon="bx-math" name={f} color="text-green-500" />
+                      <RoutineItem key={f} icon={faCalculator} name={f} color="text-green-500" />
                     ))}
                   </SectionNode>
                 )}
@@ -340,14 +359,14 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 {(db.events?.length ?? 0) > 0 && (
                   <SectionNode
                     label="Events"
-                    icon="bx-calendar"
+                    icon={faCalendar}
                     nodeId={`section:${db.name}:events`}
                     expanded={expandedNodes.has(`section:${db.name}:events`)}
                     onToggle={toggleSection}
                     count={db.events?.length ?? 0}
                   >
                     {db.events?.map((ev) => (
-                      <RoutineItem key={ev} icon="bx-calendar" name={ev} color="text-cyan-500" />
+                      <RoutineItem key={ev} icon={faCalendar} name={ev} color="text-cyan-500" />
                     ))}
                   </SectionNode>
                 )}
@@ -367,17 +386,17 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
           {contextMenu.type === "table" && contextMenu.name && (
             <>
               <ContextMenuItem
-                icon="bx-table"
+                icon={faTable}
                 label="Select Rows"
                 onClick={() => setContextMenu(null)}
               />
               <ContextMenuItem
-                icon="bx-edit"
+                icon={faPen}
                 label="Alter Table"
                 onClick={() => setContextMenu(null)}
               />
               <ContextMenuItem
-                icon="bx-copy"
+                icon={faCopy}
                 label="Copy Table Name"
                 onClick={async () => {
                   await navigator.clipboard.writeText(contextMenu.name!);
@@ -386,19 +405,19 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                 }}
               />
               <ContextMenuItem
-                icon="bx-code-alt"
+                icon={faFileCode}
                 label="Copy CREATE Statement"
                 onClick={() => handleCopyCreateStatement(contextMenu.db, contextMenu.name!)}
               />
               <div className="my-1 h-px bg-border mx-2" />
               <ContextMenuItem
-                icon="bx-minus-circle"
+                icon={faTrash}
                 label="Truncate Table"
                 danger
                 onClick={() => setContextMenu(null)}
               />
               <ContextMenuItem
-                icon="bx-trash"
+                icon={faTrash}
                 label="Drop Table"
                 danger
                 onClick={() => setContextMenu(null)}
@@ -408,24 +427,24 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
           {contextMenu.type === "db" && (
             <>
               <ContextMenuItem
-                icon="bx-code-alt"
+                icon={faFileCode}
                 label="New SQL Sheet"
                 onClick={() => setContextMenu(null)}
               />
               <ContextMenuItem
-                icon="bx-plus"
+                icon={faPlus}
                 label="Create Table"
                 onClick={() => setContextMenu(null)}
               />
               <div className="my-1 h-px bg-border mx-2" />
               <ContextMenuItem
-                icon="bx-export"
+                icon={faFileExport}
                 label="Export Database"
                 onClick={() => setContextMenu(null)}
               />
               <div className="my-1 h-px bg-border mx-2" />
               <ContextMenuItem
-                icon="bx-trash"
+                icon={faTrash}
                 label="Drop Database"
                 danger
                 onClick={() => setContextMenu(null)}
@@ -448,7 +467,7 @@ function SectionNode({
   children,
 }: {
   label: string;
-  icon: string;
+  icon: IconDefinition;
   nodeId: string;
   expanded: boolean;
   onToggle: (id: string) => void;
@@ -461,12 +480,13 @@ function SectionNode({
         className="flex items-center gap-1.5 px-2 py-0.5 cursor-pointer hover:bg-accent/50 rounded-sm text-xs text-muted-foreground"
         onClick={() => onToggle(nodeId)}
       >
-        <i className={`bx ${icon} text-sm shrink-0`} />
+        <FontAwesomeIcon icon={icon} className="text-sm shrink-0" />
         <span className="font-medium flex-1">{label}</span>
         <span className="text-[10px]">{count}</span>
-        <i
+        <FontAwesomeIcon
+          icon={faChevronRight}
           className={cn(
-            "bx bx-chevron-right text-[10px] transition-transform",
+            "text-[10px] transition-transform",
             expanded && "rotate-90",
           )}
         />
@@ -476,10 +496,10 @@ function SectionNode({
   );
 }
 
-function RoutineItem({ icon, name, color }: { icon: string; name: string; color: string }) {
+function RoutineItem({ icon, name, color }: { icon: IconDefinition; name: string; color: string }) {
   return (
     <div className="flex items-center gap-1.5 px-2 py-0.5 cursor-pointer hover:bg-accent/50 rounded-sm text-xs">
-      <i className={`bx ${icon} ${color} text-sm shrink-0`} />
+      <FontAwesomeIcon icon={icon} className={`${color} text-sm shrink-0`} />
       <span className="truncate">{name}</span>
     </div>
   );
@@ -491,7 +511,7 @@ function ContextMenuItem({
   danger,
   onClick,
 }: {
-  icon: string;
+  icon: IconDefinition;
   label: string;
   danger?: boolean;
   onClick: () => void;
@@ -504,7 +524,7 @@ function ContextMenuItem({
       )}
       onClick={onClick}
     >
-      <i className={`bx ${icon} text-base`} />
+      <FontAwesomeIcon icon={icon} className="text-base" />
       {label}
     </button>
   );

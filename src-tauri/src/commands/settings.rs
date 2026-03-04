@@ -25,7 +25,8 @@ pub async fn get_settings() -> Result<AppSettings, String> {
     let app_version = get_setting("app_version")
         .map_err(|e| e.to_string())?
         .unwrap_or_else(|| "\"1.0.0\"".to_string());
-    let app_version = serde_json::from_str::<String>(&app_version).unwrap_or_else(|_| "1.0.0".to_string());
+    let app_version =
+        serde_json::from_str::<String>(&app_version).unwrap_or_else(|_| "1.0.0".to_string());
 
     Ok(AppSettings {
         theme,

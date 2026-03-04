@@ -20,7 +20,13 @@ pub async fn get_table_definition(
     database: String,
     table: String,
 ) -> Result<String, String> {
-    crate::commands::mysql::get_create_statement(connection_id, database, "TABLE".to_string(), table).await
+    crate::commands::mysql::get_create_statement(
+        connection_id,
+        database,
+        "TABLE".to_string(),
+        table,
+    )
+    .await
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,7 +55,10 @@ pub async fn apply_table_changes(input: ApplyTableChangesInput) -> Result<(), St
 pub async fn create_table(connection_id: String, sql: String) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -57,12 +66,19 @@ pub async fn create_table(connection_id: String, sql: String) -> Result<(), Stri
 pub async fn alter_table(connection_id: String, sql: String) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[command]
-pub async fn drop_table(connection_id: String, database: String, table: String) -> Result<(), String> {
+pub async fn drop_table(
+    connection_id: String,
+    database: String,
+    table: String,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
     sqlx::query::<MySql>(&format!("DROP TABLE `{}`.`{}`", database, table))
@@ -73,7 +89,11 @@ pub async fn drop_table(connection_id: String, database: String, table: String) 
 }
 
 #[command]
-pub async fn truncate_table(connection_id: String, database: String, table: String) -> Result<(), String> {
+pub async fn truncate_table(
+    connection_id: String,
+    database: String,
+    table: String,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
     sqlx::query::<MySql>(&format!("TRUNCATE TABLE `{}`.`{}`", database, table))
@@ -84,7 +104,12 @@ pub async fn truncate_table(connection_id: String, database: String, table: Stri
 }
 
 #[command]
-pub async fn create_database(connection_id: String, name: String, charset: Option<String>, collation: Option<String>) -> Result<(), String> {
+pub async fn create_database(
+    connection_id: String,
+    name: String,
+    charset: Option<String>,
+    collation: Option<String>,
+) -> Result<(), String> {
     let pool = crate::commands::mysql::get_pool_extern(&connection_id)
         .ok_or_else(|| "Not connected".to_string())?;
 
@@ -96,7 +121,10 @@ pub async fn create_database(connection_id: String, name: String, charset: Optio
         sql.push_str(&format!(" COLLATE {}", co));
     }
 
-    sqlx::query::<MySql>(&sql).execute(&pool).await.map_err(|e| e.to_string())?;
+    sqlx::query::<MySql>(&sql)
+        .execute(&pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
