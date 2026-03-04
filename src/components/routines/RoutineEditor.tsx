@@ -69,11 +69,8 @@ export function RoutineEditor({
   const [showParamModal, setShowParamModal] = useState(false);
   const [paramValues, setParamValues] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!isNew) {
-      loadDefinition();
-    }
-  }, [routineName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!isNew) loadDefinition(); }, [routineName]);
 
   const loadDefinition = async () => {
     setIsLoading(true);

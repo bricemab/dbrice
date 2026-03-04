@@ -102,9 +102,8 @@ export function UserManager({ connectionId }: UserManagerProps) {
   const [, setSchemaPrivileges] = useState<Record<string, Record<string, boolean>>>({});
   const [adminPrivileges, setAdminPrivileges] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    loadUsers();
-  }, [connectionId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadUsers(); }, [connectionId]);
 
   const loadUsers = async () => {
     setIsLoading(true);

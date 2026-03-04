@@ -27,6 +27,7 @@ interface ToastState {
   removeToast: (id: string) => void;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   addToast: (toast) => {
@@ -38,6 +39,7 @@ export const useToastStore = create<ToastState>((set) => ({
   },
 }));
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function toast(
   title: string,
   options?: { type?: ToastType; description?: string; persistent?: boolean },

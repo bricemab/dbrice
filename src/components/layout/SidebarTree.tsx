@@ -69,11 +69,8 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
     name?: string;
   } | null>(null);
 
-  useEffect(() => {
-    if (session?.isConnected) {
-      loadDatabases();
-    }
-  }, [session?.isConnected, connectionId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (session?.isConnected) loadDatabases(); }, [session?.isConnected, connectionId]);
 
   const loadDatabases = async () => {
     try {

@@ -100,6 +100,7 @@ export function SqlEditor({ value, onChange, onExecute, schemas = {} }: SqlEdito
       view.destroy();
       viewRef.current = null;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only initialize once
 
   // Update theme

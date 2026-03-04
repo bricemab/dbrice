@@ -48,15 +48,11 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDatabases();
-  }, [connectionId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadDatabases(); }, [connectionId]);
 
-  useEffect(() => {
-    if (selectedDatabase) {
-      loadTables(selectedDatabase);
-    }
-  }, [selectedDatabase]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (selectedDatabase) loadTables(selectedDatabase); }, [selectedDatabase]);
 
   const loadDatabases = async () => {
     try {

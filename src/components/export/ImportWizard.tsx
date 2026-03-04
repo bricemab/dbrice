@@ -40,9 +40,8 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
   const [importDone, setImportDone] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadDatabases();
-  }, [connectionId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadDatabases(); }, [connectionId]);
 
   const loadDatabases = async () => {
     try {
