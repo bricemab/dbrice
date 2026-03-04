@@ -6,7 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -42,16 +48,37 @@ interface UserManagerProps {
 }
 
 const SCHEMA_PRIVILEGES = [
-  "SELECT", "INSERT", "UPDATE", "DELETE", "CREATE", "DROP",
-  "INDEX", "ALTER", "CREATE TEMPORARY TABLES", "LOCK TABLES",
-  "EXECUTE", "CREATE VIEW", "SHOW VIEW", "CREATE ROUTINE",
-  "ALTER ROUTINE", "EVENT", "TRIGGER", "REFERENCES",
+  "SELECT",
+  "INSERT",
+  "UPDATE",
+  "DELETE",
+  "CREATE",
+  "DROP",
+  "INDEX",
+  "ALTER",
+  "CREATE TEMPORARY TABLES",
+  "LOCK TABLES",
+  "EXECUTE",
+  "CREATE VIEW",
+  "SHOW VIEW",
+  "CREATE ROUTINE",
+  "ALTER ROUTINE",
+  "EVENT",
+  "TRIGGER",
+  "REFERENCES",
 ];
 
 const ADMIN_ROLES = [
-  "SUPER", "PROCESS", "RELOAD", "SHUTDOWN", "FILE",
-  "REPLICATION CLIENT", "REPLICATION SLAVE", "CREATE USER",
-  "SHOW DATABASES", "CREATE TABLESPACE",
+  "SUPER",
+  "PROCESS",
+  "RELOAD",
+  "SHUTDOWN",
+  "FILE",
+  "REPLICATION CLIENT",
+  "REPLICATION SLAVE",
+  "CREATE USER",
+  "SHOW DATABASES",
+  "CREATE TABLESPACE",
 ];
 
 const AUTH_PLUGINS = [
@@ -102,8 +129,10 @@ export function UserManager({ connectionId }: UserManagerProps) {
   const [, setSchemaPrivileges] = useState<Record<string, Record<string, boolean>>>({});
   const [adminPrivileges, setAdminPrivileges] = useState<Record<string, boolean>>({});
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadUsers(); }, [connectionId]);
+  useEffect(() => {
+    loadUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionId]);
 
   const loadUsers = async () => {
     setIsLoading(true);
@@ -181,7 +210,9 @@ export function UserManager({ connectionId }: UserManagerProps) {
         max_connections_per_hour: parseInt(form.max_connections_per_hour) || 0,
         max_user_connections: parseInt(form.max_user_connections) || 0,
       });
-      toast.success(`User \`${form.username}\`@\`${form.host}\` ${editUser ? "updated" : "created"}`);
+      toast.success(
+        `User \`${form.username}\`@\`${form.host}\` ${editUser ? "updated" : "created"}`,
+      );
       setShowUserModal(false);
       loadUsers();
     } catch (err) {
@@ -212,8 +243,12 @@ export function UserManager({ connectionId }: UserManagerProps) {
 
   const handleApplyPrivileges = async (schema: string, privs: Record<string, boolean>) => {
     if (!selectedUser) return;
-    const granted = Object.entries(privs).filter(([, v]) => v).map(([k]) => k);
-    const revoked = Object.entries(privs).filter(([, v]) => !v).map(([k]) => k);
+    const granted = Object.entries(privs)
+      .filter(([, v]) => v)
+      .map(([k]) => k);
+    const revoked = Object.entries(privs)
+      .filter(([, v]) => !v)
+      .map(([k]) => k);
     try {
       if (granted.length > 0) {
         await tauriGrantPrivileges({
@@ -264,7 +299,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
                     "flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-muted/60 group",
                     selectedUser?.user === user.user &&
                       selectedUser?.host === user.host &&
-                      "bg-primary/10 text-primary"
+                      "bg-primary/10 text-primary",
                   )}
                   onClick={() => handleSelectUser(user)}
                 >
@@ -276,7 +311,10 @@ export function UserManager({ connectionId }: UserManagerProps) {
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       className="p-1 hover:text-foreground text-muted-foreground"
-                      onClick={(e) => { e.stopPropagation(); openEditUser(user); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openEditUser(user);
+                      }}
                     >
                       <FontAwesomeIcon icon={faPen} className="text-sm" />
                     </button>
@@ -315,10 +353,14 @@ export function UserManager({ connectionId }: UserManagerProps) {
               </h3>
               <div className="flex gap-2 mt-1">
                 {selectedUser.plugin && (
-                  <Badge variant="secondary" className="text-xs">{selectedUser.plugin}</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    {selectedUser.plugin}
+                  </Badge>
                 )}
                 {selectedUser.account_locked && (
-                  <Badge variant="warning" className="text-xs">Locked</Badge>
+                  <Badge variant="warning" className="text-xs">
+                    Locked
+                  </Badge>
                 )}
               </div>
             </div>
@@ -358,12 +400,7 @@ export function UserManager({ connectionId }: UserManagerProps) {
                       </div>
                     ))}
                   </div>
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      handleApplyPrivileges("*", adminPrivileges)
-                    }
-                  >
+                  <Button size="sm" onClick={() => handleApplyPrivileges("*", adminPrivileges)}>
                     Apply Admin Roles
                   </Button>
                 </div>
@@ -415,7 +452,9 @@ export function UserManager({ connectionId }: UserManagerProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {AUTH_PLUGINS.map((p) => (
-                      <SelectItem key={p} value={p}>{p}</SelectItem>
+                      <SelectItem key={p} value={p}>
+                        {p}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -434,7 +473,9 @@ export function UserManager({ connectionId }: UserManagerProps) {
                   <Input
                     type="password"
                     value={form.password_confirm}
-                    onChange={(e) => setForm((prev) => ({ ...prev, password_confirm: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, password_confirm: e.target.value }))
+                    }
                   />
                 </div>
               </div>
@@ -469,12 +510,20 @@ export function UserManager({ connectionId }: UserManagerProps) {
             </TabsContent>
           </Tabs>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUserModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setShowUserModal(false)}>
+              Cancel
+            </Button>
             <Button onClick={handleSaveUser} disabled={isSaving}>
               {isSaving ? (
-                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Saving...</>
+                <>
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                  Saving...
+                </>
               ) : (
-                <><FontAwesomeIcon icon={faFloppyDisk} />Save</>
+                <>
+                  <FontAwesomeIcon icon={faFloppyDisk} />
+                  Save
+                </>
               )}
             </Button>
           </DialogFooter>
@@ -507,7 +556,7 @@ function SchemaPrivilegesPanel({
 }) {
   const [schema, setSchema] = useState("*");
   const [privs, setPrivs] = useState<Record<string, boolean>>(
-    Object.fromEntries(SCHEMA_PRIVILEGES.map((p) => [p, false]))
+    Object.fromEntries(SCHEMA_PRIVILEGES.map((p) => [p, false])),
   );
 
   const toggleAll = (val: boolean) => {
@@ -541,9 +590,7 @@ function SchemaPrivilegesPanel({
             <Checkbox
               id={`priv-${priv}`}
               checked={privs[priv] ?? false}
-              onCheckedChange={(v) =>
-                setPrivs((prev) => ({ ...prev, [priv]: !!v }))
-              }
+              onCheckedChange={(v) => setPrivs((prev) => ({ ...prev, [priv]: !!v }))}
             />
             <Label htmlFor={`priv-${priv}`} className="text-xs cursor-pointer">
               {priv}

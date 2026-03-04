@@ -14,7 +14,7 @@ pub fn get_pool_extern(connection_id: &str) -> Option<Pool<MySql>> {
 use crate::crypto::keychain;
 use crate::db::local;
 use crate::models::connection::ConnectionMethod;
-use crate::models::query::{ColumnMeta, QueryResult, QueryStatus, QueryType};
+use crate::models::query::{ColumnMeta, QueryResult, QueryType};
 use crate::ssh::tunnel;
 
 static POOLS: Lazy<Mutex<HashMap<String, Pool<MySql>>>> = Lazy::new(|| Mutex::new(HashMap::new()));

@@ -40,8 +40,10 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
   const [importDone, setImportDone] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadDatabases(); }, [connectionId]);
+  useEffect(() => {
+    loadDatabases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionId]);
 
   const loadDatabases = async () => {
     try {
@@ -71,8 +73,7 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
   };
 
   const handleImport = async () => {
-    const targetDb =
-      destinationType === "new" ? newDatabaseName.trim() : selectedDatabase;
+    const targetDb = destinationType === "new" ? newDatabaseName.trim() : selectedDatabase;
 
     if (!targetDb) {
       toast.error("Please select or enter a database name");
@@ -170,7 +171,9 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
                   </SelectTrigger>
                   <SelectContent>
                     {databases.map((db) => (
-                      <SelectItem key={db} value={db}>{db}</SelectItem>
+                      <SelectItem key={db} value={db}>
+                        {db}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -274,9 +277,15 @@ export function ImportWizard({ connectionId, defaultDatabase }: ImportWizardProp
             className="w-full"
           >
             {isImporting ? (
-              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Importing...</>
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                Importing...
+              </>
             ) : (
-              <><FontAwesomeIcon icon={faFileImport} />Start Import</>
+              <>
+                <FontAwesomeIcon icon={faFileImport} />
+                Start Import
+              </>
             )}
           </Button>
         </div>

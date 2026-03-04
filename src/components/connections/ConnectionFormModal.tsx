@@ -24,12 +24,7 @@ import { tauriTestConnection } from "@/lib/tauri";
 import type { Connection, CreateConnectionInput } from "@/types/connection";
 import { generateConnectionColor } from "@/lib/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSpinner,
-  faEye,
-  faEyeSlash,
-  faFloppyDisk,
-} from "@fortawesome/free-solid-svg-icons";
+import { faSpinner, faEye, faEyeSlash, faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 
 interface ConnectionFormModalProps {
   open: boolean;
@@ -358,9 +353,7 @@ export function ConnectionFormModal({ open, onClose, editConnection }: Connectio
                 Testing...
               </>
             ) : (
-              <>
-                Test Connection
-              </>
+              <>Test Connection</>
             )}
           </Button>
           <div className="flex gap-2 ml-auto">

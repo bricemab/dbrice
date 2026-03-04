@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::MySql;
 use tauri::command;
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TableDefinition {
     pub name: String,

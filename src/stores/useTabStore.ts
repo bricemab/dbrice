@@ -159,9 +159,7 @@ export const useTabStore = create<TabState>((set, get) => ({
         if (ct.connectionId !== connectionId) return ct;
         return {
           ...ct,
-          workspaceTabs: ct.workspaceTabs.map((t) =>
-            t.id === tabId ? { ...t, title } : t,
-          ),
+          workspaceTabs: ct.workspaceTabs.map((t) => (t.id === tabId ? { ...t, title } : t)),
         };
       }),
     }));

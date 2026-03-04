@@ -133,11 +133,7 @@ export function OnboardingPage() {
               </div>
             )}
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!password || !confirm || isLoading}
-            >
+            <Button type="submit" className="w-full" disabled={!password || !confirm || isLoading}>
               {isLoading ? (
                 <>
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin" />

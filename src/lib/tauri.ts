@@ -75,14 +75,22 @@ export const tauriTestConnection = (input: TestConnectionInput) =>
 
 // ─── Schema Introspection ─────────────────────────────────────────────────────
 
-export interface GetDbInput { connection_id: string }
-export interface GetTableInput { connection_id: string; database: string }
-export interface GetColumnInput { connection_id: string; database: string; table: string }
+export interface GetDbInput {
+  connection_id: string;
+}
+export interface GetTableInput {
+  connection_id: string;
+  database: string;
+}
+export interface GetColumnInput {
+  connection_id: string;
+  database: string;
+  table: string;
+}
 
 export const tauriGetDatabases = (input: GetDbInput) =>
   invoke<string[]>("get_databases", { input });
-export const tauriGetTables = (input: GetTableInput) =>
-  invoke<TableDef[]>("get_tables", { input });
+export const tauriGetTables = (input: GetTableInput) => invoke<TableDef[]>("get_tables", { input });
 export const tauriGetTableColumns = (input: GetColumnInput) =>
   invoke("get_table_columns", { input });
 export const tauriGetTableIndexes = (input: GetColumnInput) =>
@@ -92,15 +100,16 @@ export const tauriGetTableForeignKeys = (input: GetColumnInput) =>
 export const tauriGetTableTriggers = (input: GetColumnInput) =>
   invoke("get_table_triggers", { input });
 
-export interface GetObjectInput { connection_id: string; database: string }
-export const tauriGetViews = (input: GetObjectInput) =>
-  invoke<string[]>("get_views", { input });
+export interface GetObjectInput {
+  connection_id: string;
+  database: string;
+}
+export const tauriGetViews = (input: GetObjectInput) => invoke<string[]>("get_views", { input });
 export const tauriGetProcedures = (input: GetObjectInput) =>
   invoke<string[]>("get_procedures", { input });
 export const tauriGetFunctions = (input: GetObjectInput) =>
   invoke<string[]>("get_functions", { input });
-export const tauriGetEvents = (input: GetObjectInput) =>
-  invoke<string[]>("get_events", { input });
+export const tauriGetEvents = (input: GetObjectInput) => invoke<string[]>("get_events", { input });
 
 export interface GetCreateStmtInput {
   connection_id: string;
@@ -138,10 +147,8 @@ export interface CreateDatabaseInput {
 
 export const tauriCreateTable = (input: CreateTableInput) =>
   invoke<void>("create_table", { input });
-export const tauriAlterTable = (input: AlterTableInput) =>
-  invoke<void>("alter_table", { input });
-export const tauriDropTable = (input: DropTableInput) =>
-  invoke<void>("drop_table", { input });
+export const tauriAlterTable = (input: AlterTableInput) => invoke<void>("alter_table", { input });
+export const tauriDropTable = (input: DropTableInput) => invoke<void>("drop_table", { input });
 export const tauriTruncateTable = (input: DropTableInput) =>
   invoke<void>("truncate_table", { input });
 export const tauriCreateDatabase = (input: CreateDatabaseInput) =>
@@ -175,8 +182,7 @@ export const tauriGetRoutineDefinition = (input: GetRoutineInput) =>
   invoke<RoutineDef>("get_routine_definition", { input });
 export const tauriSaveRoutine = (input: SaveRoutineInput) =>
   invoke<void>("save_routine", { input });
-export const tauriDropRoutine = (input: GetRoutineInput) =>
-  invoke<void>("drop_routine", { input });
+export const tauriDropRoutine = (input: GetRoutineInput) => invoke<void>("drop_routine", { input });
 export const tauriExecuteRoutine = (input: ExecuteRoutineInput) =>
   invoke<QueryResult>("execute_routine", { input });
 
@@ -209,12 +215,9 @@ export interface PrivilegesInput {
 
 export const tauriGetUsers = (input: { connection_id: string }) =>
   invoke<MySQLUser[]>("get_users", { input });
-export const tauriCreateUser = (input: UserInput) =>
-  invoke<void>("create_user", { input });
-export const tauriUpdateUser = (input: UserInput) =>
-  invoke<void>("update_user", { input });
-export const tauriDeleteUser = (input: UserIdInput) =>
-  invoke<void>("delete_user", { input });
+export const tauriCreateUser = (input: UserInput) => invoke<void>("create_user", { input });
+export const tauriUpdateUser = (input: UserInput) => invoke<void>("update_user", { input });
+export const tauriDeleteUser = (input: UserIdInput) => invoke<void>("delete_user", { input });
 export const tauriGetUserPrivileges = (input: UserIdInput) =>
   invoke("get_user_privileges", { input });
 export const tauriGrantPrivileges = (input: PrivilegesInput) =>
@@ -246,8 +249,7 @@ export interface ImportSqlInput {
 
 export const tauriExportDatabase = (input: ExportDatabaseInput) =>
   invoke<void>("export_database", { input });
-export const tauriImportSql = (input: ImportSqlInput) =>
-  invoke<void>("import_sql", { input });
+export const tauriImportSql = (input: ImportSqlInput) => invoke<void>("import_sql", { input });
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 

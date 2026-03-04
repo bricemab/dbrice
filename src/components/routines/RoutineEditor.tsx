@@ -2,12 +2,23 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SqlEditor } from "@/components/editor/SqlEditor";
 import { ResultGrid } from "@/components/editor/ResultGrid";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
-import { tauriGetRoutineDefinition, tauriSaveRoutine, tauriDropRoutine, tauriExecuteRoutine } from "@/lib/tauri";
+import {
+  tauriGetRoutineDefinition,
+  tauriSaveRoutine,
+  tauriDropRoutine,
+  tauriExecuteRoutine,
+} from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
 import { useTabStore } from "@/stores/useTabStore";
 import type { RoutineDef, RoutineParam } from "@/types/schema";
@@ -56,7 +67,7 @@ export function RoutineEditor({
   const isNew = !routineName;
 
   const [definition, setDefinition] = useState<string>(
-    routineType === "PROCEDURE" ? DEFAULT_PROC : DEFAULT_FUNC
+    routineType === "PROCEDURE" ? DEFAULT_PROC : DEFAULT_FUNC,
   );
   const [originalDef, setOriginalDef] = useState<string>("");
   const [routineDef, setRoutineDef] = useState<RoutineDef | null>(null);
@@ -69,8 +80,10 @@ export function RoutineEditor({
   const [showParamModal, setShowParamModal] = useState(false);
   const [paramValues, setParamValues] = useState<Record<string, string>>({});
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (!isNew) loadDefinition(); }, [routineName]);
+  useEffect(() => {
+    if (!isNew) loadDefinition();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routineName]);
 
   const loadDefinition = async () => {
     setIsLoading(true);
@@ -128,7 +141,9 @@ export function RoutineEditor({
     if (params.length > 0) {
       // Initialize param values
       const initVals: Record<string, string> = {};
-      params.forEach((p) => { initVals[p.name] = ""; });
+      params.forEach((p) => {
+        initVals[p.name] = "";
+      });
       setParamValues(initVals);
       setShowParamModal(true);
     } else {
@@ -206,23 +221,30 @@ export function RoutineEditor({
               Drop
             </Button>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExecute}
-            disabled={isExecuting}
-          >
+          <Button variant="outline" size="sm" onClick={handleExecute} disabled={isExecuting}>
             {isExecuting ? (
-              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                Executing...
+              </>
             ) : (
-              <><FontAwesomeIcon icon={faPlay} />Execute</>
+              <>
+                <FontAwesomeIcon icon={faPlay} />
+                Execute
+              </>
             )}
           </Button>
           <Button size="sm" onClick={handleSave} disabled={isSaving}>
             {isSaving ? (
-              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Saving...</>
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                Saving...
+              </>
             ) : (
-              <><FontAwesomeIcon icon={faFloppyDisk} />Save</>
+              <>
+                <FontAwesomeIcon icon={faFloppyDisk} />
+                Save
+              </>
             )}
           </Button>
         </div>
@@ -231,11 +253,7 @@ export function RoutineEditor({
       {/* Editor */}
       <div className="flex-1 overflow-hidden flex flex-col">
         <div className="flex-1 overflow-hidden">
-          <SqlEditor
-            value={definition}
-            onChange={handleChange}
-            onExecute={() => handleExecute()}
-          />
+          <SqlEditor value={definition} onChange={handleChange} onExecute={() => handleExecute()} />
         </div>
 
         {/* Error */}
@@ -296,15 +314,20 @@ export function RoutineEditor({
             </div>
           </ScrollArea>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowParamModal(false)}>Cancel</Button>
-            <Button
-              onClick={() => executeRoutine(paramValues)}
-              disabled={isExecuting}
-            >
+            <Button variant="outline" onClick={() => setShowParamModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => executeRoutine(paramValues)} disabled={isExecuting}>
               {isExecuting ? (
-                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
+                <>
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                  Executing...
+                </>
               ) : (
-                <><FontAwesomeIcon icon={faPlay} />Execute</>
+                <>
+                  <FontAwesomeIcon icon={faPlay} />
+                  Execute
+                </>
               )}
             </Button>
           </DialogFooter>

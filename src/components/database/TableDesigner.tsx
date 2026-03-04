@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { tauriCreateTable, tauriAlterTable } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
@@ -71,15 +77,36 @@ type FkEdit = {
 };
 
 const DATATYPES = [
-  "INT", "BIGINT", "SMALLINT", "TINYINT", "MEDIUMINT",
-  "DECIMAL(10,2)", "FLOAT", "DOUBLE",
-  "VARCHAR(255)", "VARCHAR(100)", "VARCHAR(50)",
-  "TEXT", "MEDIUMTEXT", "LONGTEXT", "TINYTEXT",
-  "CHAR(1)", "CHAR(36)",
-  "DATETIME", "TIMESTAMP", "DATE", "TIME", "YEAR",
-  "BLOB", "MEDIUMBLOB", "LONGBLOB",
-  "JSON", "ENUM", "SET",
-  "BOOLEAN", "BIT(1)",
+  "INT",
+  "BIGINT",
+  "SMALLINT",
+  "TINYINT",
+  "MEDIUMINT",
+  "DECIMAL(10,2)",
+  "FLOAT",
+  "DOUBLE",
+  "VARCHAR(255)",
+  "VARCHAR(100)",
+  "VARCHAR(50)",
+  "TEXT",
+  "MEDIUMTEXT",
+  "LONGTEXT",
+  "TINYTEXT",
+  "CHAR(1)",
+  "CHAR(36)",
+  "DATETIME",
+  "TIMESTAMP",
+  "DATE",
+  "TIME",
+  "YEAR",
+  "BLOB",
+  "MEDIUMBLOB",
+  "LONGBLOB",
+  "JSON",
+  "ENUM",
+  "SET",
+  "BOOLEAN",
+  "BIT(1)",
 ];
 
 const ENGINES = ["InnoDB", "MyISAM", "MEMORY", "CSV", "ARCHIVE", "BLACKHOLE", "FEDERATED"];
@@ -138,13 +165,27 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
   const [collation, setCollation] = useState(tableDef?.options?.collation ?? "utf8mb4_unicode_ci");
   const [tableComment, setTableComment] = useState(tableDef?.options?.comment ?? "");
   const [autoIncrement, setAutoIncrement] = useState(
-    tableDef?.options?.auto_increment ? String(tableDef.options.auto_increment) : ""
+    tableDef?.options?.auto_increment ? String(tableDef.options.auto_increment) : "",
   );
 
   const [columns, setColumns] = useState<ColEdit[]>(
     tableDef?.columns?.map(colFromDef) ?? [
-      { ...defaultCol(), name: "id", datatype: "INT", pk: true, nn: true, ai: true, uq: false, b: false, un: true, zf: false, g: false, default_val: "", comment: "" },
-    ]
+      {
+        ...defaultCol(),
+        name: "id",
+        datatype: "INT",
+        pk: true,
+        nn: true,
+        ai: true,
+        uq: false,
+        b: false,
+        un: true,
+        zf: false,
+        g: false,
+        default_val: "",
+        comment: "",
+      },
+    ],
   );
 
   const [indexes, setIndexes] = useState<IdxEdit[]>(
@@ -155,7 +196,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
         name: i.name,
         index_type: i.index_type,
         columns: i.columns.map((c) => c.column_name).join(", "),
-      })) ?? []
+      })) ?? [],
   );
 
   const [foreignKeys, setForeignKeys] = useState<FkEdit[]>(
@@ -167,7 +208,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
       ref_column: fk.referenced_column,
       on_delete: fk.on_delete,
       on_update: fk.on_update,
-    })) ?? []
+    })) ?? [],
   );
 
   const [selectedColId, setSelectedColId] = useState<string | null>(null);
@@ -183,7 +224,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
         // If setting PK, auto-set NN
         if (field === "pk" && value) updated.nn = true;
         return updated;
-      })
+      }),
     );
   }, []);
 
@@ -233,7 +274,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
     const fkDefs = foreignKeys
       .map(
         (fk) =>
-          `,\n  CONSTRAINT \`${fk.name}\` FOREIGN KEY (\`${fk.column}\`) REFERENCES \`${fk.ref_table}\` (\`${fk.ref_column}\`) ON DELETE ${fk.on_delete} ON UPDATE ${fk.on_update}`
+          `,\n  CONSTRAINT \`${fk.name}\` FOREIGN KEY (\`${fk.column}\`) REFERENCES \`${fk.ref_table}\` (\`${fk.ref_column}\`) ON DELETE ${fk.on_delete} ON UPDATE ${fk.on_update}`,
       )
       .join("");
 
@@ -297,7 +338,23 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
       setColumns(tableDef.columns?.map(colFromDef) ?? []);
     } else {
       setTableName("");
-      setColumns([{ ...defaultCol(), name: "id", datatype: "INT", pk: true, nn: true, ai: true, uq: false, b: false, un: true, zf: false, g: false, default_val: "", comment: "" }]);
+      setColumns([
+        {
+          ...defaultCol(),
+          name: "id",
+          datatype: "INT",
+          pk: true,
+          nn: true,
+          ai: true,
+          uq: false,
+          b: false,
+          un: true,
+          zf: false,
+          g: false,
+          default_val: "",
+          comment: "",
+        },
+      ]);
       setIndexes([]);
       setForeignKeys([]);
     }
@@ -330,9 +387,15 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
           </Button>
           <Button size="sm" onClick={handleApply} disabled={isApplying || !tableName.trim()}>
             {isApplying ? (
-              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Applying...</>
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                Applying...
+              </>
             ) : (
-              <><FontAwesomeIcon icon={faCheck} />Apply</>
+              <>
+                <FontAwesomeIcon icon={faCheck} />
+                Apply
+              </>
             )}
           </Button>
         </div>
@@ -355,8 +418,24 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-muted/50">
-                    {["Column Name", "Datatype", "PK", "NN", "UQ", "B", "UN", "ZF", "AI", "G", "Default", "Comment"].map((h) => (
-                      <th key={h} className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground whitespace-nowrap">
+                    {[
+                      "Column Name",
+                      "Datatype",
+                      "PK",
+                      "NN",
+                      "UQ",
+                      "B",
+                      "UN",
+                      "ZF",
+                      "AI",
+                      "G",
+                      "Default",
+                      "Comment",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground whitespace-nowrap"
+                      >
                         {h}
                       </th>
                     ))}
@@ -368,7 +447,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                       key={col.id}
                       className={cn(
                         "hover:bg-muted/30 cursor-pointer border-b border-border/50",
-                        selectedColId === col.id && "bg-primary/10"
+                        selectedColId === col.id && "bg-primary/10",
                       )}
                       onClick={() => setSelectedColId(col.id)}
                     >
@@ -390,19 +469,23 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                           </SelectTrigger>
                           <SelectContent>
                             {DATATYPES.map((dt) => (
-                              <SelectItem key={dt} value={dt}>{dt}</SelectItem>
+                              <SelectItem key={dt} value={dt}>
+                                {dt}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </td>
-                      {(["pk", "nn", "uq", "b", "un", "zf", "ai", "g"] as (keyof ColEdit)[]).map((f) => (
-                        <td key={f} className="px-2 py-1 text-center">
-                          <Checkbox
-                            checked={col[f] as boolean}
-                            onCheckedChange={(v) => updateCol(col.id, f, !!v)}
-                          />
-                        </td>
-                      ))}
+                      {(["pk", "nn", "uq", "b", "un", "zf", "ai", "g"] as (keyof ColEdit)[]).map(
+                        (f) => (
+                          <td key={f} className="px-2 py-1 text-center">
+                            <Checkbox
+                              checked={col[f] as boolean}
+                              onCheckedChange={(v) => updateCol(col.id, f, !!v)}
+                            />
+                          </td>
+                        ),
+                      )}
                       <td className="px-2 py-1">
                         <Input
                           value={col.default_val}
@@ -450,7 +533,10 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
               <thead>
                 <tr className="bg-muted/50">
                   {["Index Name", "Type", "Columns", "Actions"].map((h) => (
-                    <th key={h} className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground">
+                    <th
+                      key={h}
+                      className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground"
+                    >
                       {h}
                     </th>
                   ))}
@@ -464,7 +550,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         value={idx.name}
                         onChange={(e) =>
                           setIndexes((prev) =>
-                            prev.map((i) => (i.id === idx.id ? { ...i, name: e.target.value } : i))
+                            prev.map((i) => (i.id === idx.id ? { ...i, name: e.target.value } : i)),
                           )
                         }
                         className="h-6 text-xs w-36"
@@ -476,7 +562,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         value={idx.index_type}
                         onValueChange={(v) =>
                           setIndexes((prev) =>
-                            prev.map((i) => (i.id === idx.id ? { ...i, index_type: v } : i))
+                            prev.map((i) => (i.id === idx.id ? { ...i, index_type: v } : i)),
                           )
                         }
                       >
@@ -485,7 +571,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         </SelectTrigger>
                         <SelectContent>
                           {INDEX_TYPES.map((t) => (
-                            <SelectItem key={t} value={t}>{t}</SelectItem>
+                            <SelectItem key={t} value={t}>
+                              {t}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -495,7 +583,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         value={idx.columns}
                         onChange={(e) =>
                           setIndexes((prev) =>
-                            prev.map((i) => (i.id === idx.id ? { ...i, columns: e.target.value } : i))
+                            prev.map((i) =>
+                              i.id === idx.id ? { ...i, columns: e.target.value } : i,
+                            ),
                           )
                         }
                         className="h-6 text-xs w-40"
@@ -540,8 +630,19 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="bg-muted/50">
-                  {["FK Name", "Column", "Ref Table", "Ref Column", "ON DELETE", "ON UPDATE", ""].map((h) => (
-                    <th key={h} className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground whitespace-nowrap">
+                  {[
+                    "FK Name",
+                    "Column",
+                    "Ref Table",
+                    "Ref Column",
+                    "ON DELETE",
+                    "ON UPDATE",
+                    "",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="text-left px-2 py-1.5 border-b font-medium text-muted-foreground whitespace-nowrap"
+                    >
                       {h}
                     </th>
                   ))}
@@ -550,26 +651,30 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
               <tbody>
                 {foreignKeys.map((fk) => (
                   <tr key={fk.id} className="border-b border-border/50">
-                    {(["name", "column", "ref_table", "ref_column"] as (keyof FkEdit)[]).map((f) => (
-                      <td key={f} className="px-2 py-1">
-                        <Input
-                          value={fk[f] as string}
-                          onChange={(e) =>
-                            setForeignKeys((prev) =>
-                              prev.map((k) => (k.id === fk.id ? { ...k, [f]: e.target.value } : k))
-                            )
-                          }
-                          className="h-6 text-xs w-28"
-                        />
-                      </td>
-                    ))}
+                    {(["name", "column", "ref_table", "ref_column"] as (keyof FkEdit)[]).map(
+                      (f) => (
+                        <td key={f} className="px-2 py-1">
+                          <Input
+                            value={fk[f] as string}
+                            onChange={(e) =>
+                              setForeignKeys((prev) =>
+                                prev.map((k) =>
+                                  k.id === fk.id ? { ...k, [f]: e.target.value } : k,
+                                ),
+                              )
+                            }
+                            className="h-6 text-xs w-28"
+                          />
+                        </td>
+                      ),
+                    )}
                     {(["on_delete", "on_update"] as (keyof FkEdit)[]).map((f) => (
                       <td key={f} className="px-2 py-1">
                         <Select
                           value={fk[f] as string}
                           onValueChange={(v) =>
                             setForeignKeys((prev) =>
-                              prev.map((k) => (k.id === fk.id ? { ...k, [f]: v } : k))
+                              prev.map((k) => (k.id === fk.id ? { ...k, [f]: v } : k)),
                             )
                           }
                         >
@@ -578,7 +683,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                           </SelectTrigger>
                           <SelectContent>
                             {FK_ACTIONS.map((a) => (
-                              <SelectItem key={a} value={a}>{a}</SelectItem>
+                              <SelectItem key={a} value={a}>
+                                {a}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -589,9 +696,7 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                         variant="ghost"
                         size="icon-sm"
                         className="text-destructive"
-                        onClick={() =>
-                          setForeignKeys((prev) => prev.filter((k) => k.id !== fk.id))
-                        }
+                        onClick={() => setForeignKeys((prev) => prev.filter((k) => k.id !== fk.id))}
                       >
                         <FontAwesomeIcon icon={faTrash} />
                       </Button>
@@ -631,7 +736,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
           <div className="flex h-full items-center justify-center text-muted-foreground">
             <div className="text-center space-y-2">
               <FontAwesomeIcon icon={faBolt} className="text-3xl block" />
-              <p className="text-sm">Trigger management available via context menu on table in sidebar.</p>
+              <p className="text-sm">
+                Trigger management available via context menu on table in sidebar.
+              </p>
               <p className="text-xs">Right-click a table → Manage Triggers</p>
             </div>
           </div>
@@ -649,7 +756,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                   </SelectTrigger>
                   <SelectContent>
                     {ENGINES.map((e) => (
-                      <SelectItem key={e} value={e}>{e}</SelectItem>
+                      <SelectItem key={e} value={e}>
+                        {e}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -662,7 +771,9 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
                   </SelectTrigger>
                   <SelectContent>
                     {CHARSETS.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -714,9 +825,15 @@ export function TableDesigner({ connectionId, database, tableDef, onApplied }: T
             </Button>
             <Button onClick={handleApply} disabled={isApplying}>
               {isApplying ? (
-                <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Executing...</>
+                <>
+                  <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                  Executing...
+                </>
               ) : (
-                <><FontAwesomeIcon icon={faPlay} />Execute</>
+                <>
+                  <FontAwesomeIcon icon={faPlay} />
+                  Execute
+                </>
               )}
             </Button>
           </DialogFooter>

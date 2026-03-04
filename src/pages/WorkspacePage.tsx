@@ -25,7 +25,7 @@ export function WorkspacePage({ connectionId }: WorkspacePageProps) {
   const { sessions } = useSessionStore();
   const activeTab = getActiveWorkspaceTab(connectionId);
   const session = sessions.get(connectionId);
-  const currentDatabase = session?.currentDatabase ?? "";
+  const currentDatabase = session?.activeDatabase ?? "";
 
   const renderContent = () => {
     if (!activeTab) {
@@ -74,20 +74,10 @@ export function WorkspacePage({ connectionId }: WorkspacePageProps) {
         return <UserManager connectionId={connectionId} />;
 
       case "export":
-        return (
-          <ExportWizard
-            connectionId={connectionId}
-            defaultDatabase={currentDatabase}
-          />
-        );
+        return <ExportWizard connectionId={connectionId} defaultDatabase={currentDatabase} />;
 
       case "import":
-        return (
-          <ImportWizard
-            connectionId={connectionId}
-            defaultDatabase={currentDatabase}
-          />
-        );
+        return <ImportWizard connectionId={connectionId} defaultDatabase={currentDatabase} />;
 
       case "logs":
         return <LogsPanel connectionId={connectionId} />;

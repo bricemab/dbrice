@@ -69,15 +69,15 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
     name?: string;
   } | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (session?.isConnected) loadDatabases(); }, [session?.isConnected, connectionId]);
+  useEffect(() => {
+    if (session?.isConnected) loadDatabases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.isConnected, connectionId]);
 
   const loadDatabases = async () => {
     try {
       const dbs = await tauriGetDatabases({ connection_id: connectionId });
-      setDatabases(
-        dbs.map((name) => ({ name, loaded: false, expanded: false })),
-      );
+      setDatabases(dbs.map((name) => ({ name, loaded: false, expanded: false })));
     } catch (err) {
       toast.error("Failed to load databases", String(err));
     }
@@ -141,7 +141,11 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
 
     if (!isExpanded && !table.columnsLoaded) {
       try {
-        const cols = await tauriGetTableColumns({ connection_id: connectionId, database: db, table: table.name }) as ColumnInfo[];
+        const cols = (await tauriGetTableColumns({
+          connection_id: connectionId,
+          database: db,
+          table: table.name,
+        })) as ColumnInfo[];
         setDatabases((prev) =>
           prev.map((d) =>
             d.name === db
@@ -184,7 +188,12 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
 
   const handleCopyCreateStatement = async (db: string, table: string) => {
     try {
-      const sql = await tauriGetCreateStatement({ connection_id: connectionId, database: db, object_type: "TABLE", name: table });
+      const sql = await tauriGetCreateStatement({
+        connection_id: connectionId,
+        database: db,
+        object_type: "TABLE",
+        name: table,
+      });
       await navigator.clipboard.writeText(sql);
       toast.success("CREATE statement copied");
     } catch (err) {
@@ -256,7 +265,10 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                           onClick={() => toggleTable(db.name, table)}
                           onContextMenu={(e) => handleTableContextMenu(e, db.name, table.name)}
                         >
-                          <FontAwesomeIcon icon={faTable} className="text-blue-500 text-sm shrink-0" />
+                          <FontAwesomeIcon
+                            icon={faTable}
+                            className="text-blue-500 text-sm shrink-0"
+                          />
                           <span className="truncate flex-1">{table.name}</span>
                           <FontAwesomeIcon
                             icon={faChevronRight}
@@ -277,7 +289,10 @@ export function SidebarTree({ connectionId }: SidebarTreeProps) {
                                   key={col.name}
                                   className="flex items-center gap-1 px-2 py-0.5 text-xs text-muted-foreground hover:text-foreground hover:bg-accent/30 rounded-sm cursor-default"
                                 >
-                                  <FontAwesomeIcon icon={faTableColumns} className="text-[10px] shrink-0" />
+                                  <FontAwesomeIcon
+                                    icon={faTableColumns}
+                                    className="text-[10px] shrink-0"
+                                  />
                                   <span className="truncate">{col.name}</span>
                                   <div className="flex gap-0.5 ml-auto shrink-0">
                                     {badges.map((b) => (
@@ -482,10 +497,7 @@ function SectionNode({
         <span className="text-[10px]">{count}</span>
         <FontAwesomeIcon
           icon={faChevronRight}
-          className={cn(
-            "text-[10px] transition-transform",
-            expanded && "rotate-90",
-          )}
+          className={cn("text-[10px] transition-transform", expanded && "rotate-90")}
         />
       </div>
       {expanded && <div className="pl-2">{children}</div>}

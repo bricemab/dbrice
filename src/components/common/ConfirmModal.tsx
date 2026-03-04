@@ -42,7 +42,9 @@ export function ConfirmModal({
             <DialogTitle>{title}</DialogTitle>
           </div>
         </DialogHeader>
-        <DialogDescription className="text-sm text-muted-foreground">{description}</DialogDescription>
+        <DialogDescription className="text-sm text-muted-foreground">
+          {description}
+        </DialogDescription>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel

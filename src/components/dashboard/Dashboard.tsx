@@ -113,11 +113,7 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <MetricCard icon={faDatabase} label="Version" value={status.version} />
-          <MetricCard
-            icon={faClock}
-            label="Uptime"
-            value={formatUptime(status.uptime_seconds)}
-          />
+          <MetricCard icon={faClock} label="Uptime" value={formatUptime(status.uptime_seconds)} />
           <MetricCard
             icon={faMicrochip}
             label="Queries/sec"
@@ -166,22 +162,14 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={dbSizes} layout="vertical">
                 <XAxis type="number" tick={{ fontSize: 11 }} />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  width={100}
-                  tick={{ fontSize: 11 }}
-                />
+                <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 11 }} />
                 <Tooltip
                   formatter={(v: number) => [`${v.toFixed(2)} MB`, "Size"]}
                   contentStyle={{ fontSize: 12 }}
                 />
                 <Bar dataKey="size_mb" radius={[0, 4, 4, 0]}>
                   {dbSizes.map((_, i) => (
-                    <Cell
-                      key={i}
-                      fill={`hsl(${(i * 47) % 360}, 70%, 55%)`}
-                    />
+                    <Cell key={i} fill={`hsl(${(i * 47) % 360}, 70%, 55%)`} />
                   ))}
                 </Bar>
               </BarChart>
@@ -256,7 +244,15 @@ export function DashboardPage({ connectionId }: DashboardPageProps) {
   );
 }
 
-function MetricCard({ icon, label, value }: { icon: IconDefinition; label: string; value: string }) {
+function MetricCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: IconDefinition;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="flex items-center gap-2 mb-1">

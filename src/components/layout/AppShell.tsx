@@ -29,11 +29,7 @@ export function AppShell() {
         </button>
       </div>
       <div className="flex-1 overflow-hidden">
-        {showHome ? (
-          <HomePage />
-        ) : (
-          <WorkspacePage connectionId={activeConnectionId!} />
-        )}
+        {showHome ? <HomePage /> : <WorkspacePage connectionId={activeConnectionId!} />}
       </div>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>

@@ -48,11 +48,15 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
   const [exportDone, setExportDone] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadDatabases(); }, [connectionId]);
+  useEffect(() => {
+    loadDatabases();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectionId]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { if (selectedDatabase) loadTables(selectedDatabase); }, [selectedDatabase]);
+  useEffect(() => {
+    if (selectedDatabase) loadTables(selectedDatabase);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDatabase]);
 
   const loadDatabases = async () => {
     try {
@@ -171,7 +175,9 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
                 </SelectTrigger>
                 <SelectContent>
                   {databases.map((db) => (
-                    <SelectItem key={db} value={db}>{db}</SelectItem>
+                    <SelectItem key={db} value={db}>
+                      {db}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -180,7 +186,9 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
             {tables.length > 0 && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label>Tables ({selectedTables.size}/{tables.length} selected)</Label>
+                  <Label>
+                    Tables ({selectedTables.size}/{tables.length} selected)
+                  </Label>
                   <div className="flex gap-2">
                     <button
                       className="text-xs text-primary hover:underline"
@@ -284,12 +292,10 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
                 ] as [boolean, (v: boolean) => void, string][]
               ).map(([val, setter, label]) => (
                 <div key={label} className="flex items-center gap-2">
-                  <Checkbox
-                    id={label}
-                    checked={val}
-                    onCheckedChange={(v) => setter(!!v)}
-                  />
-                  <Label htmlFor={label} className="text-sm cursor-pointer">{label}</Label>
+                  <Checkbox id={label} checked={val} onCheckedChange={(v) => setter(!!v)} />
+                  <Label htmlFor={label} className="text-sm cursor-pointer">
+                    {label}
+                  </Label>
                 </div>
               ))}
             </section>
@@ -356,9 +362,15 @@ export function ExportWizard({ connectionId, defaultDatabase }: ExportWizardProp
             className="w-full"
           >
             {isExporting ? (
-              <><FontAwesomeIcon icon={faSpinner} className="animate-spin" />Exporting...</>
+              <>
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin" />
+                Exporting...
+              </>
             ) : (
-              <><FontAwesomeIcon icon={faFileExport} />Start Export</>
+              <>
+                <FontAwesomeIcon icon={faFileExport} />
+                Start Export
+              </>
             )}
           </Button>
         </div>

@@ -58,8 +58,7 @@ toast.error = (title: string, description?: string) =>
   toast(title, { type: "error", description, persistent: true });
 toast.warning = (title: string, description?: string) =>
   toast(title, { type: "warning", description });
-toast.info = (title: string, description?: string) =>
-  toast(title, { type: "info", description });
+toast.info = (title: string, description?: string) => toast(title, { type: "info", description });
 
 function ToastItem({ item }: { item: ToastItem }) {
   const removeToast = useToastStore((s) => s.removeToast);
@@ -94,7 +93,10 @@ function ToastItem({ item }: { item: ToastItem }) {
         "min-w-[300px] max-w-[400px]",
       )}
     >
-      <FontAwesomeIcon icon={icons[item.type]} className={cn("text-lg mt-0.5", styles[item.type])} />
+      <FontAwesomeIcon
+        icon={icons[item.type]}
+        className={cn("text-lg mt-0.5", styles[item.type])}
+      />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground">{item.title}</p>
         {item.description && (

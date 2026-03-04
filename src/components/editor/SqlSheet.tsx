@@ -123,10 +123,7 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
           )}
         </Button>
 
-        <Select
-          value={String(limit)}
-          onValueChange={(v) => setLimit(parseInt(v))}
-        >
+        <Select value={String(limit)} onValueChange={(v) => setLimit(parseInt(v))}>
           <SelectTrigger className="h-7 w-24 text-xs">
             <span className="text-muted-foreground mr-1">LIMIT</span>
             <SelectValue />
@@ -152,15 +149,8 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
       {/* Split view */}
       <div className="split-container flex flex-col flex-1 overflow-hidden">
         {/* Editor */}
-        <div
-          className="overflow-hidden"
-          style={{ height: `${splitPosition}%` }}
-        >
-          <SqlEditor
-            value={sql}
-            onChange={handleSqlChange}
-            onExecute={handleExecute}
-          />
+        <div className="overflow-hidden" style={{ height: `${splitPosition}%` }}>
+          <SqlEditor value={sql} onChange={handleSqlChange} onExecute={handleExecute} />
         </div>
 
         {/* Divider */}
@@ -172,10 +162,7 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
         </div>
 
         {/* Results */}
-        <div
-          className="overflow-hidden"
-          style={{ height: `${100 - splitPosition - 1}%` }}
-        >
+        <div className="overflow-hidden" style={{ height: `${100 - splitPosition - 1}%` }}>
           {/* Error banner */}
           {error && (
             <div className="flex items-start gap-2 px-3 py-2 bg-red-500/10 border-b border-red-500/20 text-sm text-red-600 dark:text-red-400">

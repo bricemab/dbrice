@@ -161,13 +161,10 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
     }
   };
 
-  const handleCopyCell = useCallback(
-    async (e: React.ClipboardEvent, value: string | null) => {
-      e.preventDefault();
-      await navigator.clipboard.writeText(value ?? "");
-    },
-    [],
-  );
+  const handleCopyCell = useCallback(async (e: React.ClipboardEvent, value: string | null) => {
+    e.preventDefault();
+    await navigator.clipboard.writeText(value ?? "");
+  }, []);
 
   if (result.columns.length === 0) {
     return (
@@ -191,14 +188,18 @@ export function ResultGrid({ result, connectionId, primaryKeys = [] }: ResultGri
         <div className="ml-auto flex gap-2">
           <button
             className="flex items-center gap-1 hover:text-foreground transition-colors"
-            onClick={() => {/* export CSV */}}
+            onClick={() => {
+              /* export CSV */
+            }}
           >
             <FontAwesomeIcon icon={faFileExport} />
             CSV
           </button>
           <button
             className="flex items-center gap-1 hover:text-foreground transition-colors"
-            onClick={() => {/* export JSON */}}
+            onClick={() => {
+              /* export JSON */
+            }}
           >
             <FontAwesomeIcon icon={faFileCode} />
             JSON

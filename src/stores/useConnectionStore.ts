@@ -45,10 +45,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
   load: async () => {
     set({ isLoading: true });
     try {
-      const [connections, folders] = await Promise.all([
-        tauriGetConnections(),
-        tauriGetFolders(),
-      ]);
+      const [connections, folders] = await Promise.all([tauriGetConnections(), tauriGetFolders()]);
       set({ connections, folders, isLoading: false });
     } catch {
       set({ isLoading: false });

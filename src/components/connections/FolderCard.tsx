@@ -94,10 +94,7 @@ export function FolderCard({ folder, connections, onEditConnection }: FolderCard
 
           <FontAwesomeIcon
             icon={faChevronRight}
-            className={cn(
-              "text-muted-foreground transition-transform",
-              isExpanded && "rotate-90",
-            )}
+            className={cn("text-muted-foreground transition-transform", isExpanded && "rotate-90")}
           />
 
           {/* Actions */}
@@ -129,11 +126,7 @@ export function FolderCard({ folder, connections, onEditConnection }: FolderCard
         {isExpanded && connections.length > 0 && (
           <div className="mt-2 pl-6 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
             {connections.map((conn) => (
-              <ConnectionCard
-                key={conn.id}
-                connection={conn}
-                onEdit={onEditConnection}
-              />
+              <ConnectionCard key={conn.id} connection={conn} onEdit={onEditConnection} />
             ))}
           </div>
         )}

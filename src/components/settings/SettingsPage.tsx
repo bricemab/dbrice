@@ -156,9 +156,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              {pwdError && (
-                <p className="text-sm text-destructive">{pwdError}</p>
-              )}
+              {pwdError && <p className="text-sm text-destructive">{pwdError}</p>}
               <Button
                 type="submit"
                 size="sm"
@@ -170,11 +168,7 @@ export function SettingsPage({ onClose }: { onClose: () => void }) {
 
             <div className="pt-4 border-t">
               <h4 className="text-sm font-medium text-destructive mb-2">Danger Zone</h4>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowResetModal(true)}
-              >
+              <Button variant="destructive" size="sm" onClick={() => setShowResetModal(true)}>
                 <FontAwesomeIcon icon={faRotateLeft} />
                 Reset DBrice
               </Button>

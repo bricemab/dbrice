@@ -39,13 +39,7 @@ export default function App() {
 
   return (
     <>
-      {isFirstLaunch ? (
-        <OnboardingPage />
-      ) : !isAuthenticated ? (
-        <LoginPage />
-      ) : (
-        <AppShell />
-      )}
+      {isFirstLaunch ? <OnboardingPage /> : !isAuthenticated ? <LoginPage /> : <AppShell />}
       <Toaster />
     </>
   );

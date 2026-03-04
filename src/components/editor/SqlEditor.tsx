@@ -1,11 +1,33 @@
 import { useEffect, useRef, useCallback } from "react";
-import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, drawSelection, dropCursor, rectangularSelection, crosshairCursor, highlightActiveLine } from "@codemirror/view";
+import {
+  EditorView,
+  keymap,
+  lineNumbers,
+  highlightActiveLineGutter,
+  drawSelection,
+  dropCursor,
+  rectangularSelection,
+  crosshairCursor,
+  highlightActiveLine,
+} from "@codemirror/view";
 import { EditorState, Compartment } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
 import { sql, MySQL } from "@codemirror/lang-sql";
-import { foldGutter, indentOnInput, syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldKeymap } from "@codemirror/language";
+import {
+  foldGutter,
+  indentOnInput,
+  syntaxHighlighting,
+  defaultHighlightStyle,
+  bracketMatching,
+  foldKeymap,
+} from "@codemirror/language";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
-import { autocompletion, completionKeymap, closeBrackets, closeBracketsKeymap } from "@codemirror/autocomplete";
+import {
+  autocompletion,
+  completionKeymap,
+  closeBrackets,
+  closeBracketsKeymap,
+} from "@codemirror/autocomplete";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { useSettingsStore } from "@/stores/useSettingsStore";
 
@@ -100,7 +122,7 @@ export function SqlEditor({ value, onChange, onExecute, schemas = {} }: SqlEdito
       view.destroy();
       viewRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only initialize once
 
   // Update theme

@@ -56,7 +56,10 @@ export function HomePage() {
           New Connection
         </Button>
         <div className="relative ml-auto w-64">
-          <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm" />
+          <FontAwesomeIcon
+            icon={faMagnifyingGlass}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm"
+          />
           <Input
             placeholder="Search connections..."
             value={searchQuery}
