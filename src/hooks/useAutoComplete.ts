@@ -42,7 +42,11 @@ export function useAutoComplete(connectionId: string): AutoCompleteData {
         // Fetch columns for all tables (best-effort)
         const colResults = await Promise.allSettled(
           tableNames.map((t) =>
-            tauriGetTableColumns({ connection_id: connectionId, database: activeDatabase, table: t }),
+            tauriGetTableColumns({
+              connection_id: connectionId,
+              database: activeDatabase,
+              table: t,
+            }),
           ),
         );
         const columns = colResults.flatMap((r) =>

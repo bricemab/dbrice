@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useTabStore } from "@/stores/useTabStore";
 import { tauriCreateDatabase } from "@/lib/tauri";
 import { toast } from "@/components/common/Toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -97,7 +103,15 @@ export function WorkspaceMenu({ connectionId }: WorkspaceMenuProps) {
         ))}
       </div>
 
-      <Dialog open={showCreateDb} onOpenChange={(v) => { if (!v) { setShowCreateDb(false); setNewDbName(""); } }}>
+      <Dialog
+        open={showCreateDb}
+        onOpenChange={(v) => {
+          if (!v) {
+            setShowCreateDb(false);
+            setNewDbName("");
+          }
+        }}
+      >
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Create Database</DialogTitle>
@@ -116,7 +130,14 @@ export function WorkspaceMenu({ connectionId }: WorkspaceMenuProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setShowCreateDb(false); setNewDbName(""); }} disabled={isCreating}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCreateDb(false);
+                setNewDbName("");
+              }}
+              disabled={isCreating}
+            >
               Cancel
             </Button>
             <Button onClick={handleCreateDatabase} disabled={!newDbName.trim() || isCreating}>

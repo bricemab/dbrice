@@ -491,12 +491,7 @@ export function SidebarTree({ connectionId, refreshKey }: SidebarTreeProps) {
                       count={db.functions?.length ?? 0}
                     >
                       {db.functions?.map((f) => (
-                        <RoutineItem
-                          key={f}
-                          icon={faCalculator}
-                          name={f}
-                          color="text-green-500"
-                        />
+                        <RoutineItem key={f} icon={faCalculator} name={f} color="text-green-500" />
                       ))}
                     </SectionNode>
                   )}
