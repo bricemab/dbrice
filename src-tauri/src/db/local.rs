@@ -1,4 +1,7 @@
+use aes_gcm::aead::rand_core::RngCore;
+use aes_gcm::aead::OsRng;
 use anyhow::{Context, Result};
+use base64::{engine::general_purpose::STANDARD as B64, Engine as _};
 use once_cell::sync::OnceCell;
 use rusqlite::{params, Connection};
 use std::path::PathBuf;
@@ -60,6 +63,19 @@ pub fn get_setting(key: &str) -> Result<Option<String>> {
             Err(e) => Err(e.into()),
         }
     })
+}
+
+/// Returns the global app encryption salt, creating it on first call.
+/// This salt is used to derive the session AES key from the master password.
+pub fn get_or_create_app_salt() -> Result<Vec<u8>> {
+    if let Some(b64) = get_setting("app_encryption_salt")? {
+        return B64.decode(&b64).context("Invalid app salt encoding");
+    }
+    let mut salt = [0u8; 32];
+    OsRng.fill_bytes(&mut salt);
+    let b64 = B64.encode(salt);
+    set_setting("app_encryption_salt", &b64)?;
+    Ok(salt.to_vec())
 }
 
 pub fn set_setting(key: &str, value: &str) -> Result<()> {

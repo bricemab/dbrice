@@ -9,10 +9,18 @@ use crate::models::connection::{
     Connection, ConnectionMethod, Folder, MySQLConfig, SSHAuthMethod, SSHConfig,
 };
 
+type MigrateEntry = (String, String, String, Option<String>, Option<String>);
+
 fn get_session_key() -> Result<String, String> {
     get_setting("_session_key")
         .map_err(|e| e.to_string())?
         .ok_or_else(|| "Not authenticated".to_string())
+}
+
+/// Decrypts a field using the cached fast key if possible, falling back to
+/// the legacy per-field PBKDF2 path. Returns (plaintext, was_legacy_format).
+fn decrypt_field(enc: &str, legacy_password: &str) -> anyhow::Result<(String, bool)> {
+    aes::decrypt_any(enc, legacy_password)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -39,7 +47,8 @@ pub struct CreateConnectionInput {
 pub async fn get_connections() -> Result<Vec<Connection>, String> {
     let key = get_session_key()?;
 
-    with_db(|conn| {
+    // Collect raw rows first so we can re-encrypt legacy fields afterwards.
+    let raw = with_db(|conn| {
         let mut stmt = conn.prepare(
             "SELECT id, name, folder_id, color, method, mysql_hostname_enc, mysql_port,
                     mysql_username_enc, mysql_default_schema, ssh_hostname_enc, ssh_port,
@@ -71,41 +80,59 @@ pub async fn get_connections() -> Result<Vec<Connection>, String> {
             ))
         })?;
 
-        let mut connections = Vec::new();
-        for row in rows {
-            let (
-                id,
-                name,
-                folder_id,
-                color,
-                method,
-                hostname_enc,
-                port,
-                username_enc,
-                default_schema,
-                ssh_hostname_enc,
-                ssh_port,
-                ssh_username_enc,
-                ssh_auth_method,
-                ssh_key_file_path,
-                sort_order,
-                last_connected_at,
-                created_at,
-                updated_at,
-            ) = row.map_err(|e| anyhow::anyhow!(e))?;
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| anyhow::anyhow!(e))
+    })
+    .map_err(|e| e.to_string())?;
 
-            let hostname = aes::decrypt(&hostname_enc, &key)?;
-            let username = aes::decrypt(&username_enc, &key)?;
+    let mut connections = Vec::new();
+    // (id, new_host_enc, new_user_enc, new_ssh_host_enc, new_ssh_user_enc)
+    let mut to_migrate: Vec<MigrateEntry> = Vec::new();
 
-            let ssh_config = if let Some(ssh_host_enc) = ssh_hostname_enc {
-                let ssh_host = aes::decrypt(&ssh_host_enc, &key)?;
-                let ssh_user = ssh_username_enc
-                    .as_deref()
-                    .map(|enc| aes::decrypt(enc, &key))
-                    .transpose()?
-                    .unwrap_or_default();
+    for row in raw {
+        let (
+            id,
+            name,
+            folder_id,
+            color,
+            method,
+            hostname_enc,
+            port,
+            username_enc,
+            default_schema,
+            ssh_hostname_enc,
+            ssh_port,
+            ssh_username_enc,
+            ssh_auth_method,
+            ssh_key_file_path,
+            sort_order,
+            last_connected_at,
+            created_at,
+            updated_at,
+        ) = row;
 
-                Some(SSHConfig {
+        let (hostname, host_legacy) =
+            decrypt_field(&hostname_enc, &key).map_err(|e| e.to_string())?;
+        let (username, user_legacy) =
+            decrypt_field(&username_enc, &key).map_err(|e| e.to_string())?;
+
+        // SSH fields: decrypt + prepare re-encrypted versions if needed
+        let (ssh_config, new_ssh_host_enc, new_ssh_user_enc) =
+            if let Some(ref ssh_host_enc) = ssh_hostname_enc {
+                let (ssh_host, _) = decrypt_field(ssh_host_enc, &key).map_err(|e| e.to_string())?;
+                let (ssh_user, _) = match ssh_username_enc.as_deref() {
+                    Some(enc) => decrypt_field(enc, &key).map_err(|e| e.to_string())?,
+                    None => (String::new(), false),
+                };
+
+                let sh_enc = aes::encrypt_fast(&ssh_host).map_err(|e| e.to_string())?;
+                let su_enc = if !ssh_user.is_empty() {
+                    Some(aes::encrypt_fast(&ssh_user).map_err(|e| e.to_string())?)
+                } else {
+                    None
+                };
+
+                let cfg = Some(SSHConfig {
                     hostname: ssh_host,
                     port: ssh_port.unwrap_or(22),
                     username: ssh_user,
@@ -115,48 +142,76 @@ pub async fn get_connections() -> Result<Vec<Connection>, String> {
                         _ => SSHAuthMethod::Password,
                     },
                     key_file_path: ssh_key_file_path,
-                })
+                });
+                (cfg, Some(sh_enc), su_enc)
             } else {
-                None
+                (None, None, None)
             };
 
-            let conn_method = if method == "tcp_ip_over_ssh" {
-                ConnectionMethod::TcpIpOverSsh
-            } else {
-                ConnectionMethod::TcpIp
-            };
-
-            connections.push(Connection {
-                id,
-                name,
-                folder_id,
-                color,
-                method: conn_method,
-                mysql: MySQLConfig {
-                    hostname,
-                    port,
-                    username,
-                    default_schema,
-                },
-                ssh: ssh_config,
-                sort_order,
-                last_connected_at,
-                created_at,
-                updated_at,
-            });
+        if host_legacy || user_legacy {
+            let new_host = aes::encrypt_fast(&hostname).map_err(|e| e.to_string())?;
+            let new_user = aes::encrypt_fast(&username).map_err(|e| e.to_string())?;
+            to_migrate.push((
+                id.clone(),
+                new_host,
+                new_user,
+                new_ssh_host_enc,
+                new_ssh_user_enc,
+            ));
         }
-        Ok(connections)
-    })
-    .map_err(|e| e.to_string())
+
+        let conn_method = if method == "tcp_ip_over_ssh" {
+            ConnectionMethod::TcpIpOverSsh
+        } else {
+            ConnectionMethod::TcpIp
+        };
+
+        connections.push(Connection {
+            id,
+            name,
+            folder_id,
+            color,
+            method: conn_method,
+            mysql: MySQLConfig {
+                hostname,
+                port,
+                username,
+                default_schema,
+            },
+            ssh: ssh_config,
+            sort_order,
+            last_connected_at,
+            created_at,
+            updated_at,
+        });
+    }
+
+    // Silently migrate legacy-encrypted fields to the fast format.
+    if !to_migrate.is_empty() {
+        let _ = with_db(|conn| {
+            for (id, h_enc, u_enc, ssh_h, ssh_u) in &to_migrate {
+                conn.execute(
+                    "UPDATE connections
+                     SET mysql_hostname_enc=?1, mysql_username_enc=?2,
+                         ssh_hostname_enc=COALESCE(?3, ssh_hostname_enc),
+                         ssh_username_enc=COALESCE(?4, ssh_username_enc)
+                     WHERE id=?5",
+                    params![h_enc, u_enc, ssh_h, ssh_u, id],
+                )?;
+            }
+            Ok(())
+        });
+    }
+
+    Ok(connections)
 }
 
 #[command]
 pub async fn create_connection(input: CreateConnectionInput) -> Result<Connection, String> {
-    let key = get_session_key()?;
     let id = Uuid::new_v4().to_string();
 
-    let hostname_enc = aes::encrypt(&input.mysql_hostname, &key).map_err(|e| e.to_string())?;
-    let username_enc = aes::encrypt(&input.mysql_username, &key).map_err(|e| e.to_string())?;
+    let hostname_enc = aes::encrypt_fast(&input.mysql_hostname).map_err(|e| e.to_string())?;
+    let username_enc = aes::encrypt_fast(&input.mysql_username).map_err(|e| e.to_string())?;
 
     // Store MySQL password in keychain
     if let Some(ref password) = input.mysql_password {
@@ -166,8 +221,8 @@ pub async fn create_connection(input: CreateConnectionInput) -> Result<Connectio
 
     let (ssh_hostname_enc, ssh_username_enc) =
         if let (Some(host), Some(user)) = (&input.ssh_hostname, &input.ssh_username) {
-            let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
-            let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
+            let h = aes::encrypt_fast(host).map_err(|e| e.to_string())?;
+            let u = aes::encrypt_fast(user).map_err(|e| e.to_string())?;
             (Some(h), Some(u))
         } else {
             (None, None)
@@ -201,7 +256,6 @@ pub async fn create_connection(input: CreateConnectionInput) -> Result<Connectio
     })
     .map_err(|e| e.to_string())?;
 
-    // Return the created connection
     let connections = get_connections().await?;
     connections
         .into_iter()
@@ -214,10 +268,8 @@ pub async fn update_connection(
     id: String,
     input: CreateConnectionInput,
 ) -> Result<Connection, String> {
-    let key = get_session_key()?;
-
-    let hostname_enc = aes::encrypt(&input.mysql_hostname, &key).map_err(|e| e.to_string())?;
-    let username_enc = aes::encrypt(&input.mysql_username, &key).map_err(|e| e.to_string())?;
+    let hostname_enc = aes::encrypt_fast(&input.mysql_hostname).map_err(|e| e.to_string())?;
+    let username_enc = aes::encrypt_fast(&input.mysql_username).map_err(|e| e.to_string())?;
 
     if let Some(ref password) = input.mysql_password {
         keychain::store_secret(&keychain::mysql_password_key(&id), password)
@@ -226,8 +278,8 @@ pub async fn update_connection(
 
     let (ssh_hostname_enc, ssh_username_enc) =
         if let (Some(host), Some(user)) = (&input.ssh_hostname, &input.ssh_username) {
-            let h = aes::encrypt(host, &key).map_err(|e| e.to_string())?;
-            let u = aes::encrypt(user, &key).map_err(|e| e.to_string())?;
+            let h = aes::encrypt_fast(host).map_err(|e| e.to_string())?;
+            let u = aes::encrypt_fast(user).map_err(|e| e.to_string())?;
             (Some(h), Some(u))
         } else {
             (None, None)
@@ -240,12 +292,26 @@ pub async fn update_connection(
 
     with_db(|conn| {
         conn.execute(
-            "UPDATE connections SET name=?1, folder_id=?2, color=?3, method=?4, mysql_hostname_enc=?5, mysql_port=?6, mysql_username_enc=?7, mysql_default_schema=?8, ssh_hostname_enc=?9, ssh_port=?10, ssh_username_enc=?11, ssh_auth_method=?12, ssh_key_file_path=?13, updated_at=datetime('now') WHERE id=?14",
+            "UPDATE connections SET name=?1, folder_id=?2, color=?3, method=?4,
+             mysql_hostname_enc=?5, mysql_port=?6, mysql_username_enc=?7,
+             mysql_default_schema=?8, ssh_hostname_enc=?9, ssh_port=?10,
+             ssh_username_enc=?11, ssh_auth_method=?12, ssh_key_file_path=?13,
+             updated_at=datetime('now') WHERE id=?14",
             params![
-                input.name, input.folder_id, input.color, input.method,
-                hostname_enc, input.mysql_port, username_enc, input.mysql_default_schema,
-                ssh_hostname_enc, input.ssh_port, ssh_username_enc,
-                input.ssh_auth_method, input.ssh_key_file_path, id,
+                input.name,
+                input.folder_id,
+                input.color,
+                input.method,
+                hostname_enc,
+                input.mysql_port,
+                username_enc,
+                input.mysql_default_schema,
+                ssh_hostname_enc,
+                input.ssh_port,
+                ssh_username_enc,
+                input.ssh_auth_method,
+                input.ssh_key_file_path,
+                id,
             ],
         )?;
         Ok(())
@@ -261,7 +327,6 @@ pub async fn update_connection(
 
 #[command]
 pub async fn delete_connection(id: String) -> Result<(), String> {
-    // Clean up keychain
     let _ = keychain::delete_secret(&keychain::mysql_password_key(&id));
     let _ = keychain::delete_secret(&keychain::ssh_password_key(&id));
 
@@ -281,20 +346,18 @@ pub async fn duplicate_connection(id: String) -> Result<Connection, String> {
         .ok_or_else(|| "Connection not found".to_string())?;
 
     let new_id = Uuid::new_v4().to_string();
-    let key = get_session_key()?;
 
-    let hostname_enc = aes::encrypt(&original.mysql.hostname, &key).map_err(|e| e.to_string())?;
-    let username_enc = aes::encrypt(&original.mysql.username, &key).map_err(|e| e.to_string())?;
+    let hostname_enc = aes::encrypt_fast(&original.mysql.hostname).map_err(|e| e.to_string())?;
+    let username_enc = aes::encrypt_fast(&original.mysql.username).map_err(|e| e.to_string())?;
 
-    // Copy MySQL password
     if let Ok(Some(password)) = keychain::get_secret(&keychain::mysql_password_key(&id)) {
         let _ = keychain::store_secret(&keychain::mysql_password_key(&new_id), &password);
     }
 
     let (ssh_hostname_enc, ssh_username_enc, ssh_port, ssh_auth_method, ssh_key_file_path) =
         if let Some(ref ssh) = original.ssh {
-            let h = aes::encrypt(&ssh.hostname, &key).map_err(|e| e.to_string())?;
-            let u = aes::encrypt(&ssh.username, &key).map_err(|e| e.to_string())?;
+            let h = aes::encrypt_fast(&ssh.hostname).map_err(|e| e.to_string())?;
+            let u = aes::encrypt_fast(&ssh.username).map_err(|e| e.to_string())?;
             let method = match ssh.auth_method {
                 SSHAuthMethod::KeyFile => "key_file",
                 SSHAuthMethod::Both => "both",
@@ -352,8 +415,9 @@ pub async fn duplicate_connection(id: String) -> Result<Connection, String> {
 #[command]
 pub async fn get_folders() -> Result<Vec<Folder>, String> {
     with_db(|conn| {
-        let mut stmt =
-            conn.prepare("SELECT id, name, sort_order, created_at FROM folders ORDER BY sort_order ASC, name ASC")?;
+        let mut stmt = conn.prepare(
+            "SELECT id, name, sort_order, created_at FROM folders ORDER BY sort_order ASC, name ASC",
+        )?;
         let rows = stmt.query_map([], |row| {
             Ok(Folder {
                 id: row.get(0)?,
@@ -362,7 +426,8 @@ pub async fn get_folders() -> Result<Vec<Folder>, String> {
                 created_at: row.get(3)?,
             })
         })?;
-        rows.collect::<Result<Vec<_>, _>>().map_err(|e| anyhow::anyhow!(e))
+        rows.collect::<Result<Vec<_>, _>>()
+            .map_err(|e| anyhow::anyhow!(e))
     })
     .map_err(|e| e.to_string())
 }
@@ -415,7 +480,6 @@ pub async fn update_folder(id: String, name: String) -> Result<(), String> {
 #[command]
 pub async fn delete_folder(id: String) -> Result<(), String> {
     with_db(|conn| {
-        // Move connections to root
         conn.execute(
             "UPDATE connections SET folder_id=NULL WHERE folder_id=?1",
             params![id],
