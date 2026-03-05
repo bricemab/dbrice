@@ -66,10 +66,7 @@ async fn test_generate_create_table_statement() {
         create_sql.contains("CREATE TABLE"),
         "Should contain CREATE TABLE"
     );
-    assert!(
-        create_sql.contains(table),
-        "Should contain table name"
-    );
+    assert!(create_sql.contains(table), "Should contain table name");
     assert!(create_sql.contains("id"), "Should contain id column");
     assert!(create_sql.contains("name"), "Should contain name column");
     assert!(
@@ -87,8 +84,9 @@ async fn test_export_select_to_csv_format() {
     let pool = get_pool().await;
     setup_export_table(&pool, table).await;
 
+    // CAST DECIMAL to CHAR in SQL to avoid sqlx type mismatch
     let rows = sqlx::query(&format!(
-        "SELECT id, name, value FROM testdb.{} ORDER BY id",
+        "SELECT id, name, CAST(value AS CHAR) as value FROM testdb.{} ORDER BY id",
         table
     ))
     .fetch_all(&pool)
@@ -98,7 +96,6 @@ async fn test_export_select_to_csv_format() {
     assert_eq!(rows.len(), 4, "Should have 4 rows");
 
     // Build CSV content manually (as our export would do)
-    // DECIMAL columns are decoded as String in sqlx 0.8
     let mut csv = String::from("id;name;value\n");
     for row in &rows {
         let id: i32 = row.try_get("id").unwrap();
