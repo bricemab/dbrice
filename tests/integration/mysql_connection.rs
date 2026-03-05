@@ -28,7 +28,7 @@ async fn test_valid_connection() {
 async fn test_wrong_password() {
     let result = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(5))
+        .acquire_timeout(std::time::Duration::from_secs(5))
         .connect(WRONG_PASS_URL)
         .await;
 
@@ -45,7 +45,7 @@ async fn test_wrong_password() {
 async fn test_wrong_host() {
     let result = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(3))
+        .acquire_timeout(std::time::Duration::from_secs(3))
         .connect(WRONG_HOST_URL)
         .await;
 
@@ -56,7 +56,7 @@ async fn test_wrong_host() {
 async fn test_wrong_port() {
     let result = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(3))
+        .acquire_timeout(std::time::Duration::from_secs(3))
         .connect(WRONG_PORT_URL)
         .await;
 
@@ -67,7 +67,7 @@ async fn test_wrong_port() {
 async fn test_nonexistent_user() {
     let result = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(5))
+        .acquire_timeout(std::time::Duration::from_secs(5))
         .connect(WRONG_USER_URL)
         .await;
 

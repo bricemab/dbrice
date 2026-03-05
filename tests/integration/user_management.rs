@@ -160,7 +160,7 @@ async fn test_user_password_change() {
     let new_url = "mysql://pwchange_user:newpassword456@127.0.0.1:3307/testdb";
     let new_pool = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(5))
+        .acquire_timeout(std::time::Duration::from_secs(5))
         .connect(new_url)
         .await;
 
@@ -173,7 +173,7 @@ async fn test_user_password_change() {
     let old_url = "mysql://pwchange_user:oldpassword123@127.0.0.1:3307/testdb";
     let old_pool = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(3))
+        .acquire_timeout(std::time::Duration::from_secs(3))
         .connect(old_url)
         .await;
     assert!(old_pool.is_err(), "Old password should no longer work");
@@ -214,7 +214,7 @@ async fn test_grant_all_privileges() {
     let user_url = "mysql://allpriv_user:testpass123@127.0.0.1:3307/testdb";
     let user_pool = MySqlPoolOptions::new()
         .max_connections(1)
-        .connect_timeout(std::time::Duration::from_secs(5))
+        .acquire_timeout(std::time::Duration::from_secs(5))
         .connect(user_url)
         .await
         .expect("Should connect with allpriv_user");
