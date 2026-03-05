@@ -90,7 +90,7 @@ jobs:
             echo "Waiting for MySQL... ($i/30)"
             sleep 2
           done
-      - run: cargo test --manifest-path src-tauri/Cargo.toml --test integration
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --test integration_tests
       - name: Stop services
         if: always()
         run: docker compose -f tests/integration/docker-compose.yml down
