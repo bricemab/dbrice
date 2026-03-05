@@ -1,5 +1,4 @@
 use sqlx::{mysql::MySqlPoolOptions, Row};
-use std::path::PathBuf;
 
 const TEST_DB_URL: &str = "mysql://root:testroot@127.0.0.1:3307/testdb";
 
@@ -11,49 +10,52 @@ async fn get_pool() -> sqlx::Pool<sqlx::MySql> {
         .expect("Should connect to test database")
 }
 
-/// Sets up a clean test table and inserts sample data.
-async fn setup_export_table(pool: &sqlx::Pool<sqlx::MySql>) {
-    let _ = sqlx::query("DROP TABLE IF EXISTS export_test_table")
+/// Sets up a clean test table with a given name and inserts sample data.
+async fn setup_export_table(pool: &sqlx::Pool<sqlx::MySql>, table: &str) {
+    let _ = sqlx::query(&format!("DROP TABLE IF EXISTS {}", table))
         .execute(pool)
         .await;
 
-    sqlx::query(
-        "CREATE TABLE export_test_table (
+    sqlx::query(&format!(
+        "CREATE TABLE {} (
             id INT NOT NULL AUTO_INCREMENT,
             name VARCHAR(100) NOT NULL,
             value DECIMAL(10,2) DEFAULT 0.00,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
-    )
+        table
+    ))
     .execute(pool)
     .await
-    .expect("Should create export_test_table");
+    .expect("Should create export table");
 
-    sqlx::query(
-        "INSERT INTO export_test_table (name, value) VALUES
+    sqlx::query(&format!(
+        "INSERT INTO {} (name, value) VALUES
             ('Product A', 10.50),
             ('Product B', 25.00),
             ('Product C', 5.75),
             ('Product D', 100.00)",
-    )
+        table
+    ))
     .execute(pool)
     .await
     .expect("Should insert test data");
 }
 
-async fn cleanup_export_table(pool: &sqlx::Pool<sqlx::MySql>) {
-    let _ = sqlx::query("DROP TABLE IF EXISTS export_test_table")
+async fn cleanup_export_table(pool: &sqlx::Pool<sqlx::MySql>, table: &str) {
+    let _ = sqlx::query(&format!("DROP TABLE IF EXISTS {}", table))
         .execute(pool)
         .await;
 }
 
 #[tokio::test]
 async fn test_generate_create_table_statement() {
+    let table = "export_create_stmt_test";
     let pool = get_pool().await;
-    setup_export_table(&pool).await;
+    setup_export_table(&pool, table).await;
 
-    let row = sqlx::query("SHOW CREATE TABLE testdb.export_test_table")
+    let row = sqlx::query(&format!("SHOW CREATE TABLE testdb.{}", table))
         .fetch_one(&pool)
         .await
         .expect("Should get CREATE TABLE statement");
@@ -65,7 +67,7 @@ async fn test_generate_create_table_statement() {
         "Should contain CREATE TABLE"
     );
     assert!(
-        create_sql.contains("export_test_table"),
+        create_sql.contains(table),
         "Should contain table name"
     );
     assert!(create_sql.contains("id"), "Should contain id column");
@@ -75,36 +77,41 @@ async fn test_generate_create_table_statement() {
         "Should contain AUTO_INCREMENT"
     );
 
-    cleanup_export_table(&pool).await;
+    cleanup_export_table(&pool, table).await;
     pool.close().await;
 }
 
 #[tokio::test]
 async fn test_export_select_to_csv_format() {
+    let table = "export_csv_format_test";
     let pool = get_pool().await;
-    setup_export_table(&pool).await;
+    setup_export_table(&pool, table).await;
 
-    let rows = sqlx::query("SELECT id, name, value FROM testdb.export_test_table ORDER BY id")
-        .fetch_all(&pool)
-        .await
-        .expect("Should fetch data for CSV export");
+    let rows = sqlx::query(&format!(
+        "SELECT id, name, value FROM testdb.{} ORDER BY id",
+        table
+    ))
+    .fetch_all(&pool)
+    .await
+    .expect("Should fetch data for CSV export");
 
     assert_eq!(rows.len(), 4, "Should have 4 rows");
 
     // Build CSV content manually (as our export would do)
+    // DECIMAL columns are decoded as String in sqlx 0.8
     let mut csv = String::from("id;name;value\n");
     for row in &rows {
         let id: i32 = row.try_get("id").unwrap();
         let name: String = row.try_get("name").unwrap();
-        let value: f64 = row.try_get("value").unwrap();
-        csv.push_str(&format!("{};{};{:.2}\n", id, name, value));
+        let value: String = row.try_get("value").unwrap();
+        csv.push_str(&format!("{};{};{}\n", id, name, value));
     }
 
     assert!(csv.contains("Product A"), "CSV should contain Product A");
     assert!(csv.contains("Product B"), "CSV should contain Product B");
     assert!(csv.contains("10.50"), "CSV should contain value 10.50");
 
-    cleanup_export_table(&pool).await;
+    cleanup_export_table(&pool, table).await;
     pool.close().await;
 }
 

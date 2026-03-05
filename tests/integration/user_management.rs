@@ -25,9 +25,9 @@ async fn test_create_user() {
         .await
         .expect("Should create user");
 
-    // Verify user exists
+    // Verify user exists — cast BINARY columns to CHAR for sqlx compatibility
     let row = sqlx::query(
-        "SELECT user, host FROM mysql.user WHERE user = 'test_integration_user' AND host = '%'",
+        "SELECT CAST(user AS CHAR) as user FROM mysql.user WHERE CAST(user AS CHAR) = 'test_integration_user' AND host = '%'",
     )
     .fetch_one(&pool)
     .await
@@ -106,10 +106,13 @@ async fn test_grant_and_revoke_privileges() {
 async fn test_list_users() {
     let pool = get_pool().await;
 
-    let rows = sqlx::query("SELECT user, host FROM mysql.user WHERE user != ''")
-        .fetch_all(&pool)
-        .await
-        .expect("Should list users");
+    // Cast BINARY columns to CHAR for sqlx compatibility
+    let rows = sqlx::query(
+        "SELECT CAST(user AS CHAR) as user, CAST(host AS CHAR) as host FROM mysql.user WHERE CAST(user AS CHAR) != ''",
+    )
+    .fetch_all(&pool)
+    .await
+    .expect("Should list users");
 
     // There should be at least the root user
     assert!(rows.len() > 0, "Should have at least one user");
@@ -149,6 +152,17 @@ async fn test_user_password_change() {
         .execute(&pool)
         .await
         .expect("Should create user");
+
+    // Grant access to testdb so the user can connect with a database in the URL
+    sqlx::query("GRANT SELECT ON testdb.* TO 'pwchange_user'@'%'")
+        .execute(&pool)
+        .await
+        .expect("Should grant access to testdb");
+
+    sqlx::query("FLUSH PRIVILEGES")
+        .execute(&pool)
+        .await
+        .expect("Should flush privileges");
 
     // Change password
     sqlx::query("ALTER USER 'pwchange_user'@'%' IDENTIFIED BY 'newpassword456'")
