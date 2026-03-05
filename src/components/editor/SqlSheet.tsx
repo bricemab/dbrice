@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { SqlEditor } from "./SqlEditor";
 import { ResultGrid } from "./ResultGrid";
 import type { QueryResult } from "@/types/mysql";
@@ -32,16 +32,25 @@ interface SqlSheetProps {
 const LIMIT_OPTIONS = [10, 100, 1000, 10000] as const;
 
 export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
-  const { setTabDirty } = useTabStore();
+  const { connectionTabs, setTabDirty } = useTabStore();
   const { defaultLimit } = useSettingsStore();
 
-  const [sql, setSql] = useState("SELECT 1;");
+  // Read tab metadata once on mount to support initialSql / autoExecute
+  const tabMetadata = useMemo(() => {
+    const ct = connectionTabs.find((t) => t.connectionId === connectionId);
+    return ct?.workspaceTabs.find((t) => t.id === tabId)?.metadata ?? {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const initialSql = (tabMetadata.initialSql as string) || "SELECT 1;";
+  const [sql, setSql] = useState(initialSql);
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [limit, setLimit] = useState<number>(defaultLimit);
   const [splitPosition, setSplitPosition] = useState(60); // percentage
   const isDraggingSplit = useRef(false);
+  const autoExecutedRef = useRef(false);
 
   const handleSqlChange = useCallback(
     (value: string) => {
@@ -75,6 +84,15 @@ export function SqlSheet({ connectionId, tabId }: SqlSheetProps) {
     },
     [connectionId, limit],
   );
+
+  // Auto-execute if requested by metadata (e.g. "Select Rows" from sidebar)
+  useEffect(() => {
+    if (tabMetadata.autoExecute && !autoExecutedRef.current) {
+      autoExecutedRef.current = true;
+      handleExecute(initialSql);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleExecute]);
 
   const handleSplitMouseDown = (e: React.MouseEvent) => {
     isDraggingSplit.current = true;

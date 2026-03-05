@@ -4,6 +4,7 @@ import { TabBar } from "./TabBar";
 import { HomePage } from "@/pages/HomePage";
 import { WorkspacePage } from "@/pages/WorkspacePage";
 import { SettingsPage } from "@/components/settings/SettingsPage";
+import { UpdateBanner } from "@/components/common/UpdateBanner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +17,7 @@ export function AppShell() {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      <UpdateBanner />
       <div className="flex items-center border-b">
         <div className="flex-1">
           <TabBar />
